@@ -1,0 +1,76 @@
+/*
+A full overview of g++ compiler options can be found at
+https://gcc.gnu.org/onlinedocs/gcc-3.4.0/gcc/Invoking-GCC.html
+
+To include a search path for headers add option:
+"-I<path>"
+i.e. (for sfml):
+"-IC:\\Users\\ivoms\\Documents\\programming\\cpp\\libraries\\sfml\\source\\include",
+
+To include a search path for linkables add option:
+"-L<path>"
+i.e. (for sfml):
+"-LC:\\Users\\ivoms\\Documents\\programming\\cpp\\libraries\\sfml\\bin\\debug"
+
+To link a .a file add option:
+"-l<name>"
+to add the file lib<name>.a to the linker
+
+i.e. (for sfml):
+"-lsfml-main-d",
+"-lsfml-graphics-d",
+"-lsfml-system-d",
+"-lsfml-window-d",
+"-lopengl32",
+*/
+
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "cppbuild",
+			"label": "g++ Build project (Debug)",
+			"command": "C:\\Program Files\\mingw-w64\\x86_64-8.1.0-win32-seh-rt_v6-rev0\\mingw64\\bin\\g++.exe",
+			"args": [
+				"-g",
+				"${workspaceFolder}\\src\\*.cpp",
+				"-std=c++17",
+				"-Wall",
+				"-Werror",
+				"-I${workspaceFolder}\\headers\\.",
+				"-D _DEBUG",
+				"-o",
+				"${workspaceFolder}\\application_debug.exe"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build",
+			"detail": "compiler: \"C:\\Program Files\\mingw-w64\\x86_64-8.1.0-win32-seh-rt_v6-rev0\\mingw64\\bin\\g++.exe\""
+		},
+
+		{
+			"type": "cppbuild",
+			"label": "g++ Build project (Release)",
+			"command": "C:\\Program Files\\mingw-w64\\x86_64-8.1.0-win32-seh-rt_v6-rev0\\mingw64\\bin\\g++.exe",
+			"args": [
+				"${workspaceFolder}\\src\\*.cpp",
+				"-std=c++17",
+				"-I${workspaceFolder}\\headers",
+				"-o",
+				"${workspaceFolder}\\application.exe"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build",
+			"detail": "compiler: \"C:\\Program Files\\mingw-w64\\x86_64-8.1.0-win32-seh-rt_v6-rev0\\mingw64\\bin\\g++.exe\""
+		}
+	]
+}
