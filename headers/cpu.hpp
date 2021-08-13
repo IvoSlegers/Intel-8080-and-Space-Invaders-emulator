@@ -25,7 +25,12 @@ namespace emulator
 
             void setZSPFlags(byte result);
 
-            void executeINR(byte& value);
-            void executeDCR(byte& value);
+            void executeINR(byte& reg);
+            void executeDCR(byte& reg);
+
+            void executeADD(byte value);
+            void executeSUB(byte value);
+
+            void halt();
     };
 } // namespace emulator

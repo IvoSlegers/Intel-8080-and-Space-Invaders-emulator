@@ -18,6 +18,9 @@ u8 rcl(u8 value)
     return (value | c);
 }
 
+// TODO:
+// MAKE A READ/PACK FLAGS AS BYTE FUNCTION.
+
 int main()
 {
     for (int i = 0; i < 256; ++i)
