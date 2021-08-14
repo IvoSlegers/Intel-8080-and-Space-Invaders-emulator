@@ -3,6 +3,8 @@
 #include "cpu_state.hpp"
 #include "memory.hpp"
 #include "defines.hpp"
+#include "emulator_exception.hpp"
+#include "to_hex_string.hpp"
 
 namespace emulator
 {
@@ -95,8 +97,7 @@ namespace emulator
             // Move content of HL into memory
             case 0x22:
                 address = memory.getWord(state.PC);
-                memory.set(address, state.L);
-                memory.set(address + 1, state.H);
+                memory.setWord(address, state.getHL());
                 state.PC += 2;
                 executedMachineCyles += 16;
                 break;
@@ -169,50 +170,43 @@ namespace emulator
 
             // B
             case 0x04:
-                executeINR(state.B);
-                executedMachineCyles += 5;
+                executeINR(state.B);                
                 break;
 
             // D
             case 0x14:
                 executeINR(state.D);
-                executedMachineCyles += 5;
                 break;
 
             // H
             case 0x24:
                 executeINR(state.H);
-                executedMachineCyles += 5;
                 break;
 
             // M
             case 0x34:
                 executeINR(memory[state.getHL()]);
-                executedMachineCyles += 10;
+                executedMachineCyles += 5;
                 break;
 
             // C
             case 0x0C:
                 executeINR(state.C);
-                executedMachineCyles += 5;
                 break;
 
             // E
             case 0x1C:
                 executeINR(state.E);
-                executedMachineCyles += 5;
                 break;
 
             // L
             case 0x2C:
                 executeINR(state.L);
-                executedMachineCyles += 5;
                 break;
 
             // A
             case 0x3C:
                 executeINR(state.A);
-                executedMachineCyles += 5;
                 break;
 
             // DCR, decrease register by 1
@@ -221,49 +215,42 @@ namespace emulator
             // B
             case 0x05:
                 executeDCR(state.B);
-                executedMachineCyles += 5;
                 break;
 
             // D
             case 0x15:
                 executeDCR(state.D);
-                executedMachineCyles += 5;
                 break;
 
             // H
             case 0x25:
                 executeDCR(state.H);
-                executedMachineCyles += 5;
                 break;
 
             // M
             case 0x35:
                 executeDCR(memory[state.getHL()]);
-                executedMachineCyles += 10;
+                executedMachineCyles += 5;
                 break;
 
             // C
             case 0x0D:
                 executeDCR(state.C);
-                executedMachineCyles += 5;
                 break;
 
             // E
             case 0x1D:
                 executeDCR(state.E);
-                executedMachineCyles += 5;
                 break;
 
             // L
             case 0x2D:
                 executeDCR(state.L);
-                executedMachineCyles += 5;
                 break;
 
             // A
             case 0x3D:
                 executeDCR(state.A);
-                executedMachineCyles += 5;
                 break;
 
             // MVI 
@@ -369,30 +356,23 @@ namespace emulator
 
             // BC
             case 0x09:
-                state.CY = state.getBC() > (0xFFFF - state.getHL());
-                state.setHL(state.getHL() + state.getBC());
-                executedMachineCyles += 10;
+                executeDAD(state.getBC());
                 break;
 
             // DE
             case 0x19:
-                state.CY = state.getDE() > (0xFFFF - state.getHL());
-                state.setHL(state.getHL() + state.getDE());
+                executeDAD(state.getDE());
                 executedMachineCyles += 10;
                 break;
 
             // HL
             case 0x29:
-                state.CY = state.getHL() > (0xFFFF - state.getHL());
-                state.setHL(state.getHL() + state.getHL());
-                executedMachineCyles += 10;
+                executeDAD(state.getHL());
                 break;
 
             // SP
             case 0x39:
-                state.CY = state.SP > (0xFFFF - state.getHL());
-                state.setHL(state.getHL() + state.SP);
-                executedMachineCyles += 10;
+                executeDAD(state.SP);
                 break;
 
             // LDAX
@@ -411,13 +391,12 @@ namespace emulator
                 executedMachineCyles += 7;
                 break;
 
-            //LHLD
+            // LHLD
             // Load HL from memory
 
             case 0x2A:
                 address = memory.getWord(state.PC);
-                state.L = memory.get(address);
-                state.H = memory.get(address + 1);
+                state.setHL(memory.getWord(address));
                 state.PC += 2;
                 executedMachineCyles += 16;
                 break;
@@ -786,88 +765,490 @@ namespace emulator
                 executedMachineCyles += 7;
                 break;
 
+            // ADD
+            // Add value of specified register or memory to accumulator
+
             case 0x80:
                 executeADD(state.B);
-                executedMachineCyles += 4;
                 break;
 
             case 0x81:
                 executeADD(state.C);
-                executedMachineCyles += 4;
                 break;
 
             case 0x82:
                 executeADD(state.D);
-                executedMachineCyles += 4;
                 break;
 
             case 0x83:
                 executeADD(state.E);
-                executedMachineCyles += 4;
                 break;
 
             case 0x84:
                 executeADD(state.H);
-                executedMachineCyles += 4;
                 break;
 
             case 0x85:
                 executeADD(state.L);
-                executedMachineCyles += 4;
                 break;
 
             case 0x86:
-                executeADD(memory.get(state.PC));
-                executedMachineCyles += 4;
+                executeADD(memory.get(state.getHL()));
+                executedMachineCyles += 3;
                 break;
 
             case 0x87:
                 executeADD(state.A);
-                executedMachineCyles += 4;
                 break;
+
+            // SUB
+            // Subtract value of specified register or memory from accumulator
 
             case 0x90:
                 executeSUB(state.B);
-                executedMachineCyles += 4;
                 break;
 
             case 0x91:
                 executeSUB(state.C);
-                executedMachineCyles += 4;
                 break;
 
             case 0x92:
                 executeSUB(state.D);
-                executedMachineCyles += 4;
                 break;
 
             case 0x93:
                 executeSUB(state.E);
-                executedMachineCyles += 4;
                 break;
 
             case 0x94:
                 executeSUB(state.H);
-                executedMachineCyles += 4;
                 break;
 
             case 0x95:
                 executeSUB(state.L);
-                executedMachineCyles += 4;
                 break;
 
             case 0x96:
-                executeSUB(memory.get(state.PC));
-                executedMachineCyles += 4;
+                executeSUB(memory.get(state.getHL()));
+                executedMachineCyles += 3;
                 break;
 
             case 0x97:
                 executeSUB(state.A);
-                executedMachineCyles += 4;
+                break;
+
+            // ANA
+            // Do a bitwise logical AND on the value of the accumulator and the specified register or memory.
+
+            case 0xA0:
+                executeANA(state.B);
+                break;
+
+            case 0xA1:
+                executeANA(state.C);
+                break;
+
+            case 0xA2:
+                executeANA(state.D);
+                break;
+
+            case 0xA3:
+                executeANA(state.E);
+                break;
+
+            case 0xA4:
+                executeANA(state.H);
+                break;
+
+            case 0xA5:
+                executeANA(state.L);
+                break;
+
+            case 0xA6:
+                executeANA(memory.get(state.getHL()));
+                executedMachineCyles += 3;
+                break;
+
+            case 0xA7:
+                executeANA(state.A);
+                break;
+
+            // ORA
+            // Do a bitwise logical or on the value of the accumulator and specified register or memory.
+
+            case 0xB0:
+                executeORA(state.B);
+                break;
+
+            case 0xB1:
+                executeORA(state.C);
+                break;
+
+            case 0xB2:
+                executeORA(state.D);
+                break;
+
+            case 0xB3:
+                executeORA(state.E);
+                break;
+
+            case 0xB4:
+                executeORA(state.H);
+                break;
+
+            case 0xB5:
+                executeORA(state.L);
+                break;
+
+            case 0xB6:
+                executeORA(memory.get(state.getHL()));
+                executedMachineCyles += 3;
+                break;
+
+            case 0xB7:
+                executeORA(state.A);
+                break;
+
+            // ADC (Add with carry)
+            // Add value of specified register or memory plus the carry bit to the contents of the accumulator
+
+            case 0x88:
+                executeADD(state.B, state.CY);
+                break;
+
+            case 0x89:
+                executeADD(state.C, state.CY);
+                break;
+
+            case 0x8A:
+                executeADD(state.D, state.CY);
+                break;
+
+            case 0x8B:
+                executeADD(state.E, state.CY);
+                break;
+
+            case 0x8C:
+                executeADD(state.H, state.CY);
+                break;
+
+            case 0x8D:
+                executeADD(state.L, state.CY);
+                break;
+
+            case 0x8E:
+                executeADD(memory.get(state.getHL()), state.CY);
+                executedMachineCyles += 3;
+                break;
+
+            case 0x8F:
+                executeADD(state.A, state.CY);
+                break;
+
+            // SBC (Subtract with carry)
+            // Subtract value of specified register or memory plus the carry bit from the contents of the accumulator
+
+            case 0x98:
+                executeSUB(state.B, state.CY);
+                break;
+
+            case 0x99:
+                executeSUB(state.C, state.CY);
+                break;
+
+            case 0x9A:
+                executeSUB(state.D, state.CY);
+                break;
+
+            case 0x9B:
+                executeSUB(state.E, state.CY);
+                break;
+
+            case 0x9C:
+                executeSUB(state.H, state.CY);
+                break;
+
+            case 0x9D:
+                executeSUB(state.L, state.CY);
+                break;
+
+            case 0x9E:
+                executeSUB(memory.get(state.getHL()), state.CY);
+                executedMachineCyles += 3;
+                break;
+
+            case 0x9F:
+                executeSUB(state.A, state.CY);
+                break;
+
+            // XRA
+            // Perform a bitwise logical or with the value of the specified register or memory and the contents of the accumulator.
+
+            case 0xA8:
+                executeXRA(state.B);
+                break;
+
+            case 0xA9:
+                executeXRA(state.C);
+                break;
+
+            case 0xAA:
+                executeXRA(state.D);
+                break;
+
+            case 0xAB:
+                executeXRA(state.E);
+                break;
+
+            case 0xAC:
+                executeXRA(state.H);
+                break;
+
+            case 0xAD:
+                executeXRA(state.L);
+                break;
+
+            case 0xAE:
+                executeXRA(memory.get(state.getHL()));
+                executedMachineCyles += 3;
+                break;
+
+            case 0xAF:
+                executeXRA(state.A);
+                break;
+
+            // CMP
+            // Compare value of specified register or memory with the value of the accumulator
+
+            case 0xB8:
+                executeCMP(state.B);
+                break;
+
+            case 0xB9:
+                executeCMP(state.C);
+                break;
+
+            case 0xBA:
+                executeCMP(state.D);
+                break;
+
+            case 0xBB:
+                executeCMP(state.E);
+                break;
+
+            case 0xBC:
+                executeCMP(state.H);
+                break;
+
+            case 0xBD:
+                executeCMP(state.L);
+                break;
+
+            case 0xBE:
+                executeCMP(memory.get(state.getHL()));
+                executedMachineCyles += 3;
+                break;
+
+            case 0xBF:
+                executeCMP(state.A);
+                break;
+
+            // RNZ
+            // Return when zero flag is not set
+            case 0xC0:
+                executeConditionalRET(!state.Z);
+                break;                
+
+            // RNC
+            // Return if the carry flag is not set
+            case 0xD0:
+                executeConditionalRET(!state.CY);
+                break;  
+
+            // RPO
+            // Return if the parity flag is set to odd (=0)
+            case 0xE0:
+                executeConditionalRET(!state.P);
+                break;
+
+            // RP
+            // Return if sign flag is not set (positive)
+            case 0xF0:
+                executeConditionalRET(!state.S);
+                break;
+
+            // POP
+            // Load register from stack
+
+            // BC
+            case 0xC1:
+                state.setBC(memory.getWord(state.SP));
+                state.SP += 2;
+                executedMachineCyles += 10;
+                break;
+
+            // DE
+            case 0xD1:
+                state.setDE(memory.getWord(state.SP));
+                state.SP += 2;
+                executedMachineCyles += 10;
+                break;
+
+            // HL
+            case 0xE1:
+                state.setHL(memory.getWord(state.SP));
+                state.SP += 2;
+                executedMachineCyles += 10;
+                break;
+
+            // POP PSW
+            // Load accumulator and flag status from stack
+            case 0xF1:
+                state.unpackFlags(memory.get(state.SP));
+                state.A = memory.get(state.SP + 1);
+                state.SP += 2;
+                executedMachineCyles += 10;
+                break;
+
+            // JNZ
+            // Jump if zero flag is not set
+            case 0xC2:
+                executeConditionalJMP(!state.Z);
+                break;           
+
+            // JNC
+            // Jump if carry flag is not set
+            case 0xD2:
+                executeConditionalJMP(!state.CY);
+                break;
+
+            // JPO
+            // Jump is parity flag is set to odd (= 0)
+            case 0xE2:
+                executeConditionalJMP(!state.P);
+                break;
+
+            // JP
+            // Jump if sign flag is not set (positive)
+            case 0xF2:
+                executeConditionalJMP(!state.S);
+                break;
+
+            // JMP
+            // Jump to memory address specified by intruction code
+            case 0xC3:
+                executeConditionalJMP(true);
+                break;
+
+            // OUT
+            // Put data on the data bus            
+            case 0xD3:
+                state.PC += 2;
+                break;
+
+            // XTHL
+            // Exchange register HL with top of the stack
+            case 0xE3:
+                std::swap(state.L, memory[state.SP]);
+                std::swap(state.H, memory[state.SP + 1]);
+                executedMachineCyles += 18;
+                break;
+
+            // CNZ
+            // Call if zero flag is not set
+            case 0xC4:
+                executeConditionalCALL(!state.Z);
+                break;           
+
+            // CNC
+            // Call if carry flag is not set
+            case 0xD4:
+                executeConditionalCALL(!state.CY);
+                break;
+
+            // CPO
+            // Call is parity flag is set to odd (= 0)
+            case 0xE4:
+                executeConditionalCALL(!state.P);
+                break;
+
+            // CP
+            // Call if sign flag is not set (positive)
+            case 0xF4:
+                executeConditionalCALL(!state.S);
+                break;
+
+            // PUSH
+            // Load register onto stack
+
+            // BC
+            case 0xC5:
+                memory.setWord(state.SP - 2, state.getBC());
+                state.SP -= 2;
+                executedMachineCyles += 11;
+                break;
+
+            // DE
+            case 0xD5:
+                memory.setWord(state.SP - 2, state.getDE());
+                state.SP -= 2;
+                executedMachineCyles += 11;
+                break;
+
+            // HL
+            case 0xE5:
+                memory.setWord(state.SP - 2, state.getHL());
+                state.SP -= 2;
+                executedMachineCyles += 11;
+                break;
+
+            // PUSH PSW
+            // Load accumulator and flag status onto stack
+            case 0xF5:
+                memory.set(state.SP - 1, state.A);
+                memory.set(state.SP - 2, state.packFlags());
+                state.SP -= 2;
+                executedMachineCyles += 11;
+                break;
+
+            // ADI
+            // Add to accumulator immediate (value encoded in instruction).
+            case 0xC6:
+                executeADD(memory.get(state.PC));
+                ++state.PC;
+                executedMachineCyles += 3;
+                break;
+
+            // SUI
+            // Subtract from accumulator immediate (value encoded in instruction).
+            case 0xD6:
+                executeSUB(memory.get(state.PC));
+                ++state.PC;
+                executedMachineCyles += 3;
+                break;
+
+            // ANI
+            // Perform bitwise AND with accumulator and immediate (value encoded in instruction).
+            case 0xE6:
+                executeANA(memory.get(state.PC));
+                ++state.PC;
+                executedMachineCyles += 3;
+                break;
+
+            // ORI
+            // Perform bitwise OR with accumulator and immediate (value encoded in instruction).
+            case 0xF6:
+                executeORA(memory.get(state.PC));
+                ++state.PC;
+                executedMachineCyles += 3;
                 break;
 
             // B D H M C E L A
             // BC DE HL SP
+            #if EMULATOR_CHECK_INVALID_OPCODES
+            default:
+                throw EmulatorException("Invalid opcode (0x" + toHexString(opCode) + ") encountered.");
+            #endif
         }
 
         ++executedInstructionCycles;
@@ -877,7 +1258,7 @@ namespace emulator
     {
         state.Z = (result == 0);
         state.S = ((result & 0x80) != 0);
-        state.P = __builtin_parity(result);
+        state.P = !__builtin_parity(result); // for the parity bit, 1 indicates even parity.
     }
 
     void Cpu::executeINR(byte& reg)
@@ -885,6 +1266,8 @@ namespace emulator
         state.CA = (reg & 0x0F) == 0x0F;
         ++reg;
         setZSPFlags(reg);
+
+        executedMachineCyles += 5;
     }
 
     void Cpu::executeDCR(byte& reg)
@@ -892,25 +1275,131 @@ namespace emulator
         state.CA = (reg & 0x0F) != 0;
         --reg;
         setZSPFlags(reg);
+
+        executedMachineCyles += 5;
     }
 
-    void Cpu::executeADD(byte value)
+    void Cpu::executeDAD(word value)
     {
-        state.CY = value > (0xFF - state.A);
+        state.CY = value > (0xFFFF - state.getHL());
+        state.setHL(state.getHL() + value);
+
+        executedMachineCyles += 10;
+    }
+
+    void Cpu::executeADD(byte value, byte carry)
+    {
+        state.CY = value > (0xFF - state.A - carry);
         // The auxiliary carry indicates whether there was an overflow in the addition of the last four bits only.
-        state.CA = ((state.A & 0x0F) + (value & 0x0F)) > 0x0F; 
-        state.A += value;
+        state.CA = ((state.A & 0x0F) + (value & 0x0F) + carry) > 0x0F; 
+        state.A += value + carry;
         setZSPFlags(state.A);
+
+        executedMachineCyles += 4;
     }
 
-    void Cpu::executeSUB(byte value)
+    void Cpu::executeSUB(byte value, byte carry)
     {
+        // According to the manual, the carry bit is handled by adding it to the value 
+        // that will be subtracted first.
+        value += carry;
+
         state.CY = value > state.A; // the carry flag is set when a borrow occurs.
         // The auxiliary carry indicates whether there was an overflow in the addition of the last four bits only.
         // The subtraction is performed using 2's complement representation of the second factor.
         state.CA = ((state.A & 0x0F) + ((~value + 1) & 0x0F)) > 0x0F;
         state.A -= value;
         setZSPFlags(state.A);
+
+        executedMachineCyles += 4;
+    }
+
+    void Cpu::executeANA(byte value)
+    {
+        state.CY = 0;
+        state.CA = ((state.A | value) & 0x08) >> 3;
+        state.A &= value;
+        setZSPFlags(state.A);
+
+        executedMachineCyles += 4;
+    }
+
+    void Cpu::executeORA(byte value)
+    {
+        state.CY = state.CA = 0;
+        state.A |= value;
+        setZSPFlags(state.A);
+
+        executedMachineCyles += 4;
+    }
+
+    void Cpu::executeXRA(byte value)
+    {
+        state.A ^= value;
+        state.CY = state.CA = 0;
+        setZSPFlags(state.A);
+
+        executedMachineCyles += 4;
+    }
+
+    void Cpu::executeCMP(byte value)
+    {
+        // In a intel 8080 the CMP command is performed by doing a SUB into a temporary register
+        // So all flags are set as if a subtraction was performed.
+        state.CY = value > state.A; // the carry flag is set when a borrow occurs.
+
+        // See executeSUB
+        state.CA = ((state.A & 0x0F) + ((~value + 1) & 0x0F)) > 0x0F;
+
+        setZSPFlags(state.A - value);
+
+        executedMachineCyles += 4;
+    }
+
+    void Cpu::executeRET()
+    {
+        state.PC = memory.getWord(state.SP);
+        state.SP += 2;
+
+        executedMachineCyles += 10;
+    }
+
+    void Cpu::executeConditionalRET(bool condition)
+    {
+        if (condition)
+        {
+            executeRET();
+            executedMachineCyles += 1;
+        }
+        else
+            executedMachineCyles += 5;
+    }
+
+    void Cpu::executeConditionalJMP(bool condition)
+    {
+        if (condition)
+            state.PC = memory.getWord(state.PC);
+
+        executedMachineCyles += 10;
+    }
+
+    void Cpu::executeConditionalCALL(bool condition)
+    {
+        if (condition)
+        {
+            memory.setWord(state.SP - 2, state.getHL());
+            state.SP -= 2;
+            state.PC = memory.getWord(state.PC);
+
+            executedMachineCyles += 17;
+        }
+        else
+            executedMachineCyles += 11;
+    }
+
+    void Cpu::halt()
+    {
+        return;
     }
 
 } // namespace emulator

@@ -39,6 +39,7 @@ i.e. (for sfml):
 				"-Werror",
 				"-I${workspaceFolder}\\headers\\.",
 				"-D _DEBUG",
+				"-Og",
 				"-o",
 				"${workspaceFolder}\\application_debug.exe"
 			],
@@ -60,6 +61,7 @@ i.e. (for sfml):
 				"${workspaceFolder}\\src\\*.cpp",
 				"-std=c++17",
 				"-I${workspaceFolder}\\headers",
+				"-O3",
 				"-o",
 				"${workspaceFolder}\\application.exe"
 			],

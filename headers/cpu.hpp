@@ -28,8 +28,19 @@ namespace emulator
             void executeINR(byte& reg);
             void executeDCR(byte& reg);
 
-            void executeADD(byte value);
-            void executeSUB(byte value);
+            void executeDAD(word value);
+
+            void executeADD(byte value, byte carry = 0);
+            void executeSUB(byte value, byte carry = 0);
+            void executeANA(byte value);
+            void executeORA(byte value);
+            void executeXRA(byte value);
+            void executeCMP(byte value);
+
+            void executeRET();
+            void executeConditionalRET(bool condition);
+            void executeConditionalJMP(bool condition);
+            void executeConditionalCALL(bool condition);
 
             void halt();
     };

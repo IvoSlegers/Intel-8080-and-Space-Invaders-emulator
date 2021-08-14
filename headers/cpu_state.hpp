@@ -42,6 +42,20 @@ namespace emulator
         void setDE(word value) {wordAsBytePair(value, D, E);};
         void setHL(word value) {wordAsBytePair(value, H, L);};
 
+        byte packFlags() const
+        {
+           return (S << 7) | (Z << 6) | (CA << 4) | (P << 2) | (1 << 1) | CY;
+        }
+
+        void unpackFlags(byte value)
+        {
+            S = (value >> 7) & 0x01;
+            Z = (value >> 6) & 0x01;
+            CA = (value >> 4) & 0x01;
+            P = (value >> 2) & 0x01;
+            CY = value & 0x01;
+        }
+
         // Note that according to the intel specifications the only effect of RESET
         // is PC = 0, all other registers and flags are left in a indeterminate state.
         void reset()
