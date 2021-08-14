@@ -1072,9 +1072,33 @@ namespace emulator
                 break;
 
             // RP
-            // Return if sign flag is not set (positive)
+            // Return if sign flag is not set (plus)
             case 0xF0:
                 executeConditionalRET(!state.S);
+                break;
+
+            // RZ 
+            // Return if zero flag is set
+            case 0xC8:
+                executeConditionalRET(state.Z);
+                break;
+
+            // RC
+            // Return if carry flag is set
+            case 0xD8:
+                executeConditionalRET(state.CY);
+                break;
+
+            // RPE
+            // Return is parity flag is even (= 1)
+            case 0xE8:
+                executeConditionalRET(state.P);
+                break;
+
+            // RM
+            // Return is sign flag is set (minus)
+            case 0xF8:
+                executeConditionalRET(state.S);
                 break;
 
             // POP
@@ -1134,16 +1158,46 @@ namespace emulator
                 executeConditionalJMP(!state.S);
                 break;
 
+            // JZ 
+            // Jump if zero flag is set
+            case 0xCA:
+                executeConditionalJMP(state.Z);
+                break;
+
+            // JC
+            // Jump if carry flag is set
+            case 0xDA:
+                executeConditionalJMP(state.CY);
+                break;
+
+            // JPE
+            // Jump is parity flag is even (= 1)
+            case 0xEA:
+                executeConditionalJMP(state.P);
+                break;
+
+            // JM
+            // Jump is sign flag is set (minus)
+            case 0xFA:
+                executeConditionalJMP(state.S);
+                break;
+
             // JMP
             // Jump to memory address specified by intruction code
             case 0xC3:
+
+            #if !EMULATOR_CHECK_INVALID_OPCODES
+                case 0xCB:
+            #endif
+
                 executeConditionalJMP(true);
                 break;
 
             // OUT
             // Put data on the data bus            
             case 0xD3:
-                state.PC += 2;
+                state.PC += 1;
+                executedMachineCyles += 10;
                 break;
 
             // XTHL
@@ -1152,6 +1206,13 @@ namespace emulator
                 std::swap(state.L, memory[state.SP]);
                 std::swap(state.H, memory[state.SP + 1]);
                 executedMachineCyles += 18;
+                break;
+
+            // DI
+            // Disable interrupts
+            case 0xF3:
+                setEnableInterrupts(false);
+                executedMachineCyles += 4;
                 break;
 
             // CNZ
@@ -1176,6 +1237,30 @@ namespace emulator
             // Call if sign flag is not set (positive)
             case 0xF4:
                 executeConditionalCALL(!state.S);
+                break;
+
+            // CZ 
+            // Call if zero flag is set
+            case 0xCC:
+                executeConditionalCALL(state.Z);
+                break;
+
+            // CC
+            // Call if carry flag is set
+            case 0xDC:
+                executeConditionalCALL(state.CY);
+                break;
+
+            // CPE
+            // Call is parity flag is even (= 1)
+            case 0xEC:
+                executeConditionalCALL(state.P);
+                break;
+
+            // CM
+            // Call is sign flag is set (minus)
+            case 0xFC:
+                executeConditionalCALL(state.S);
                 break;
 
             // PUSH
@@ -1243,8 +1328,110 @@ namespace emulator
                 executedMachineCyles += 3;
                 break;
 
-            // B D H M C E L A
-            // BC DE HL SP
+            // RST (Restart)
+            // Change PC to address defined by bits 3, 4, 5 of the instruction opcode
+            case 0xC7:
+            case 0xD7:
+            case 0xE7:
+            case 0xF7:
+            case 0xCF:
+            case 0xDF:
+            case 0xEF:
+            case 0xFF:
+                memory.setWord(state.SP - 2, state.getHL());
+                state.SP -= 2;
+                state.PC = opCode & 0b00111000;
+                executedMachineCyles += 11;
+                break;
+
+            case 0xC9:
+
+            #if !EMULATOR_CHECK_INVALID_OPCODES
+                case 0xD9:
+            #endif
+
+                executeRET();
+                break;
+
+            // PCHL
+            // Jump to address specified by HL register
+            case 0xE9:
+                state.PC = state.getHL();
+                executedMachineCyles += 5;
+                break;
+
+            // SPHL
+            // Contents of HL register is moved in SP
+            case 0xF9:
+                state.SP = state.getHL();
+                executedMachineCyles += 5;
+                break;
+
+            // IN
+            // Get data on the data bus      
+            case 0xDB:
+                state.PC += 1;
+                executedMachineCyles += 10;
+                break;
+
+            // XCHG
+            // Exchange HL with DE
+            case 0xEB:
+                std::swap(state.H, state.D);
+                std::swap(state.L, state.E);
+                executedMachineCyles += 5;
+                break;
+
+            // EI 
+            // Enable interrupts
+            case 0xFB:
+                setEnableInterrupts(true);
+                executedMachineCyles += 4;
+                break;
+
+            case 0xCD:
+
+            #if !EMULATOR_CHECK_INVALID_OPCODES:
+                case 0xDD:
+                case 0xED:
+                case 0xFD:
+            #endif
+
+                executeConditionalCALL(true);
+                break;
+
+            // ACI
+            // Add to accumulator immediate with carry (value encoded in instruction).
+            case 0xCE:
+                executeADD(memory.get(state.PC), state.CY);
+                ++state.PC;
+                executedMachineCyles += 3;
+                break;
+
+            // SBI
+            // Subtract from accumulator immediate with borrow (value encoded in instruction).
+            case 0xDE:
+                executeSUB(memory.get(state.PC), state.CY);
+                ++state.PC;
+                executedMachineCyles += 3;
+                break;
+
+            // XRI
+            // Perform bitwise XOR with accumulator and immediate (value encoded in instruction).
+            case 0xEE:
+                executeXRA(memory.get(state.PC));
+                ++state.PC;
+                executedMachineCyles += 3;
+                break;
+
+            // CPI
+            // Perform comparison between accumulator and immediate (value encoded in instruction).
+            case 0xFE:
+                executeCMP(memory.get(state.PC));
+                ++state.PC;
+                executedMachineCyles += 3;
+                break;
+
             #if EMULATOR_CHECK_INVALID_OPCODES
             default:
                 throw EmulatorException("Invalid opcode (0x" + toHexString(opCode) + ") encountered.");
@@ -1395,6 +1582,11 @@ namespace emulator
         }
         else
             executedMachineCyles += 11;
+    }
+
+    void Cpu::setEnableInterrupts(bool enabled)
+    {
+        return;
     }
 
     void Cpu::halt()

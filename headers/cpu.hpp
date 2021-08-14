@@ -42,6 +42,7 @@ namespace emulator
             void executeConditionalJMP(bool condition);
             void executeConditionalCALL(bool condition);
 
+            void setEnableInterrupts(bool enabled);
             void halt();
     };
 } // namespace emulator

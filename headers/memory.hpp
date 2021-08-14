@@ -3,6 +3,8 @@
 #include "int_types.hpp"
 
 #include <memory>
+#include <string>
+#include <vector>
 
 namespace emulator
 {
@@ -33,6 +35,9 @@ namespace emulator
             {
                 return totalSize;
             }
+
+            std::size_t loadROMFromFile(const std::string& path, std::size_t offset = 0);
+            void loadROMFromFiles(const std::vector<std::string> paths, std::size_t offset = 0);
 
         private:
             std::size_t romSize = 0;
