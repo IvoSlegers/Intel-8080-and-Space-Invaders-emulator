@@ -95,7 +95,7 @@ namespace emulator
         {
             throw EmulatorException(
                 "Loading file " + path + " at offset " + std::to_string(offset) +
-                " exceded ROM range (" + std::to_string(romSize) + ").");
+                " exceeds ROM range (" + std::to_string(romSize) + ").");
         }
 
         file.seekg(0);

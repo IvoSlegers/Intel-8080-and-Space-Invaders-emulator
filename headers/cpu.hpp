@@ -1,6 +1,7 @@
 #pragma once
 
 #include "int_types.hpp"
+#include "cpu_state.hpp"
 
 namespace emulator
 {
@@ -10,15 +11,18 @@ namespace emulator
     class Cpu
     {
         public:
-            explicit Cpu(Memory&, CpuState&);
+            explicit Cpu(Memory&);
 
             void reset();
 
             void executeInstructionCycle();
 
+            const Memory& getMemory() const { return memory;}
+            const CpuState& getState() const { return state;}
+
         private:
             Memory& memory;
-            CpuState& state;
+            CpuState state;
 
             std::size_t executedInstructionCycles = 0;
             std::size_t executedMachineCyles = 0;

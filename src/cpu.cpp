@@ -1,6 +1,5 @@
 #include "cpu.hpp"
 
-#include "cpu_state.hpp"
 #include "memory.hpp"
 #include "defines.hpp"
 #include "emulator_exception.hpp"
@@ -8,7 +7,7 @@
 
 namespace emulator
 {
-    Cpu::Cpu(Memory& memory_, CpuState& state_): memory(memory_), state(state_)
+    Cpu::Cpu(Memory& memory_): memory(memory_)
     {}
 
     void Cpu::reset()
@@ -1391,7 +1390,7 @@ namespace emulator
 
             case 0xCD:
 
-            #if !EMULATOR_CHECK_INVALID_OPCODES:
+            #if !EMULATOR_CHECK_INVALID_OPCODES
                 case 0xDD:
                 case 0xED:
                 case 0xFD:

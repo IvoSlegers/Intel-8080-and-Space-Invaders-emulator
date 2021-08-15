@@ -34,6 +34,7 @@ i.e. (for sfml):
 			"args": [
 				"-g",
 				"${workspaceFolder}\\src\\*.cpp",
+				"${workspaceFolder}\\src\\consolegui\\*.cpp",
 				"-std=c++17",
 				"-Wall",
 				"-Werror",
@@ -59,6 +60,7 @@ i.e. (for sfml):
 			"command": "C:\\Program Files\\mingw-w64\\x86_64-8.1.0-win32-seh-rt_v6-rev0\\mingw64\\bin\\g++.exe",
 			"args": [
 				"${workspaceFolder}\\src\\*.cpp",
+				"${workspaceFolder}\\src\\consolegui\\*.cpp",
 				"-std=c++17",
 				"-I${workspaceFolder}\\headers",
 				"-O3",
