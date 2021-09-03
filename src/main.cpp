@@ -6,8 +6,7 @@
 #include <iostream>
 
 /* TODO
-- Modify the opcode_lister.py so that word register instructions show their argument as BC, DE etc
-- get a stepwise simulation running
+- draw video memory
 */
 
 int main(void)

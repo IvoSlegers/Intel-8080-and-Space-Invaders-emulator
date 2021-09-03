@@ -20,6 +20,9 @@ namespace emulator
             const Memory& getMemory() const { return memory;}
             const CpuState& getState() const { return state;}
 
+            const std::size_t getExecutedInstructionCyles() const { return executedInstructionCycles; }
+            const std::size_t getExecutedMachineCyles() const { return executedMachineCyles; }
+
         private:
             Memory& memory;
             CpuState state;

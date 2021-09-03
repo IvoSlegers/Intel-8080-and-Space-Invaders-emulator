@@ -2,6 +2,7 @@
 
 #include <windows.h>
 #include <string>
+#include <functional>
 
 namespace emulator
 {
@@ -64,8 +65,8 @@ namespace emulator
 
             void setTextColor(const Color foreground = Color::White, const Color background = Color::Black);
 
-            using KeyEventProc = bool (*)(const KEY_EVENT_RECORD&);
-            void run(KeyEventProc keyEventCallback);
+            using KeyEventCallback = std::function<bool(const KEY_EVENT_RECORD&)>;
+            void run(KeyEventCallback keyEventCallback);
             void exit() { isRunning_ = false;}
 
             bool isRunning() const { return isRunning_;}

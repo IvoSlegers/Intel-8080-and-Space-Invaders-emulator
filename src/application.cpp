@@ -5,23 +5,39 @@
 
 namespace emulator
 {
-    Application::Application(): memory(0x8000, 0x8000), cpu(memory), console()
+    Application::Application(): memory(0x2000, 0x2000), cpu(memory), console()
     {
         memory.loadROMFromFile("invaders.rom");
     }
 
-    bool onKeyEvent(const KEY_EVENT_RECORD& event)
+    void Application::run()
     {
+        draw();
+
+        auto callback = [this] (const KEY_EVENT_RECORD& event) 
+        {
+            return this->onKeyEvent(event);
+        };
+
+        console.run(callback);
+    }
+
+    bool Application::onKeyEvent(const KEY_EVENT_RECORD& event)
+    {
+        if(event.bKeyDown && event.wVirtualKeyCode == VK_SPACE)
+        {
+            cpu.executeInstructionCycle();
+            draw();
+        }
+
         return (event.uChar.AsciiChar != 'q');
     }
 
-    void Application::run()
+    void Application::draw()
     {
         console.clear();
         drawCpuState();
         console.setCursorPosition(0, console.getScreenSize().heigh);
-
-        console.run(&onKeyEvent);
     }
 
     void Application::drawCpuState()
@@ -41,7 +57,7 @@ namespace emulator
         drawFlag("CY", state.CY, x, y);
         x += 3;
         drawFlag("CA", state.CA, x, y);
-
+        
         x = 0;
         y = 2;
 
@@ -65,7 +81,13 @@ namespace emulator
         x += 6;
         drawWordRegister("SP", state.SP, x, y);
 
-        drawInstructions(0, 16, 0, 6);
+        console.setCursorPosition(40, 0);
+        console.write("Executed instructions: " + std::to_string(cpu.getExecutedInstructionCyles()));
+
+        console.setCursorPosition(40, 1);
+        console.write("Executed cycles: " + std::to_string(cpu.getExecutedMachineCyles()));
+
+        drawInstructions(state.PC, 16, 0, 6);
     }
 
     void Application::drawRegister(const std::string& name, byte value, short x, short y)
@@ -106,13 +128,30 @@ namespace emulator
 
     word Application::drawInstruction(word address, short x, short y)
     {
+        bool isCurrentInstruction = address == cpu.getState().PC;
+
+        Color foregroundColor = isCurrentInstruction ? Color::Black : Color::White;
+        Color backgroundColor = isCurrentInstruction ? Color::White : Color::Black;
+
+        console.setTextColor(foregroundColor, backgroundColor);
+
+        if (isCurrentInstruction)
+        {
+            console.setCursorPosition(x, y);
+            console.write("                                                ");
+        }
+
         console.setCursorPosition(x, y);
         console.write(toHexString(address));
 
         byte opCode = memory.get(address);
 
+        console.setTextColor(Color::Blue, backgroundColor);
+
         console.setCursorPosition(x + 6, y);
         console.write(nmemonics[opCode]);
+
+        console.setTextColor(foregroundColor, backgroundColor);
 
         byte byte2 = 
             (static_cast<std::size_t>(address + 1) < memory.getTotalSize()) ? memory.get(address + 1) : 0;

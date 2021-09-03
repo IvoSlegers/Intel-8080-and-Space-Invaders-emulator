@@ -78,17 +78,17 @@ namespace emulator
                 break;
 
             // STAX, store accumulator indirect.
-            // Move data at address stored in either BC or DE into A
+            // Store the contents of register A in memory with address stored in either BC or DE.
 
             // BC
             case 0x02:
-                state.A = memory.get(state.getBC());
+                memory.set(state.getBC(), state.A);
                 executedMachineCyles += 7;
                 break;
 
             // DE
             case 0x12:
-                state.A = memory.get(state.getDE());
+                memory.set(state.getDE(), state.A);
                 executedMachineCyles += 7;
                 break;
 
@@ -380,13 +380,13 @@ namespace emulator
 
             // BC
             case 0x0A:
-                memory.set(state.getBC(), state.A);
+                state.A = memory.get(state.getBC());
                 executedMachineCyles += 7;
                 break;
 
             // DE
             case 0x1A:
-                memory.set(state.getDE(), state.A);
+                state.A = memory.get(state.getDE());
                 executedMachineCyles += 7;
                 break;
 
@@ -406,7 +406,7 @@ namespace emulator
             
             case 0x3A:
                 address = memory.getWord(state.PC);
-                memory.set(address, state.A);
+                state.A = memory.get(address);
                 state.PC += 2;
                 executedMachineCyles += 13;
                 break;

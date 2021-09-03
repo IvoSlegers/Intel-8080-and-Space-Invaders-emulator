@@ -14,6 +14,10 @@ namespace emulator
             void run();
 
         private:
+            bool onKeyEvent(const KEY_EVENT_RECORD& event);
+
+            void draw();
+            
             void drawCpuState();
 
             void drawRegister(const std::string& name, byte value, short x, short y);

@@ -160,7 +160,7 @@ namespace emulator
         }
     }
 
-    void Console::run(KeyEventProc keyEventCallback)
+    void Console::run(KeyEventCallback keyEventCallback)
     {
         isRunning_ = true;
 

@@ -533,19 +533,22 @@ S Z A P C	RST 7
 import re
 
 splitter_re = re.compile("[0-9A-F]x")
-splitted_string = re.split(splitter_re, raw_table_string);
+split_string = re.split(splitter_re, raw_table_string)
 
 instruction_re = re.compile("([A-Z*]{2,4})\s+([BCDEHLMA]|PSW|SP)?,?(a16|d8|d16|[BCDEHLMA])?")
 
-del splitted_string[0]
+del split_string[0]
 
-assert len(splitted_string) == 16, "Expected to find 16 opcode groups"
+assert len(split_string) == 16, "Expected to find 16 opcode groups"
 
-nmemonics = {};
-arguments = {};
-lengths = {};
+nmemonics = {}
+arguments = {}
+lengths = {}
 
-for i, part in enumerate(splitted_string):
+word_register_instructions = ["LXI", "POP", "PUSH", "INX", "DAD", "DCX"]
+word_register_names = {"B" : "BC", "D" : "DE", "H" : "HL", "SP" : "SP", "PSW" : "PSW"}
+
+for i, part in enumerate(split_string):
     instruction_matches = re.findall(instruction_re, part)
 
     assert len(instruction_matches) == 16, "Expected to find 16 opcode in a group"
@@ -573,7 +576,10 @@ for i, part in enumerate(splitted_string):
 
         argument = ""
         if (instruction[1]):
-            argument += instruction[1]
+            if (instruction[0] not in word_register_instructions):
+                argument += instruction[1]
+            else:
+                argument += word_register_names[instruction[1]]
             if (second_argument):
                 argument += ", " + second_argument
         elif (second_argument):
