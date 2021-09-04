@@ -6,12 +6,12 @@
 namespace emulator
 {
     class Memory;
-    struct CpuState;
+    class IO;
 
     class Cpu
     {
         public:
-            explicit Cpu(Memory&);
+            explicit Cpu(Memory&, IO&);
 
             void reset();
 
@@ -25,6 +25,7 @@ namespace emulator
 
         private:
             Memory& memory;
+            IO& io;
             CpuState state;
 
             std::size_t executedInstructionCycles = 0;

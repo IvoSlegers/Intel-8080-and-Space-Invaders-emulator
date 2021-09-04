@@ -8,7 +8,8 @@ Add any path containing included headers to "includePath".
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/headers/**"
+                "${workspaceFolder}/headers/**",
+                "C:\\Users\\ivoms\\Documents\\programming\\cpp\\libraries\\sfml\\source\\include"
             ],
             "defines": [
                 "_DEBUG",

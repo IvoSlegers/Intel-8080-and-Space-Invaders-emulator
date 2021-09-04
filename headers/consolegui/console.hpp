@@ -42,7 +42,7 @@ namespace emulator
     class Console
     {
         public:
-            Console();
+            explicit Console();
             Console(const Console&) = delete;
             Console(Console&&);
             ~Console();

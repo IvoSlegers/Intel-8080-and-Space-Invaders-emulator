@@ -1,35 +1,29 @@
 #pragma once
 
-#include "consolegui\console.hpp"
 #include "memory.hpp"
 #include "cpu.hpp"
+#include "io.hpp"
+
+#include "console_ui.hpp"
+#include "ui.hpp"
 
 namespace emulator
 {
     class Application
     {
         public:
-            Application();
+            explicit Application();
 
             void run();
 
         private:
             bool onKeyEvent(const KEY_EVENT_RECORD& event);
 
-            void draw();
-            
-            void drawCpuState();
-
-            void drawRegister(const std::string& name, byte value, short x, short y);
-            void drawWordRegister(const std::string& name, word value, short x, short y);
-            void drawFlag(const std::string& name, bool value, short x, short y);
-
-            void drawInstructions(word address, word len, short x, short y);
-            word drawInstruction(word address, short x, short y);
-
             Memory memory;
+            EmptyIO io;
             Cpu cpu;
 
-            Console console;
+            ConsoleUI consoleUI;
+            UI ui;
     };
 } // namespace emulator

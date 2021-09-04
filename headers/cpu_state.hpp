@@ -32,15 +32,15 @@ namespace emulator
 
         byte Z : 1, S : 1, P : 1, CY : 1, CA : 1;
 
-        CpuState(): Z(0), S(0), P(0), CY(0), CA(0) {}
+        explicit CpuState(): Z(0), S(0), P(0), CY(0), CA(0) {}
 
-        word getBC() const {return bytesAsWord(B, C);}
-        word getDE() const {return bytesAsWord(D, E);}
-        word getHL() const {return bytesAsWord(H, L);}
+        word getBC() const { return bytesAsWord(B, C); }
+        word getDE() const { return bytesAsWord(D, E); }
+        word getHL() const { return bytesAsWord(H, L); }
 
-        void setBC(word value) {wordAsBytePair(value, B, C);};
-        void setDE(word value) {wordAsBytePair(value, D, E);};
-        void setHL(word value) {wordAsBytePair(value, H, L);};
+        void setBC(word value) { wordAsBytePair(value, B, C); }
+        void setDE(word value) { wordAsBytePair(value, D, E); }
+        void setHL(word value) { wordAsBytePair(value, H, L); }
 
         byte packFlags() const
         {

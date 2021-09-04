@@ -4,10 +4,11 @@
 #include "defines.hpp"
 #include "emulator_exception.hpp"
 #include "to_hex_string.hpp"
+#include "io.hpp"
 
 namespace emulator
 {
-    Cpu::Cpu(Memory& memory_): memory(memory_)
+    Cpu::Cpu(Memory& memory_, IO& io_): memory(memory_), io(io_)
     {}
 
     void Cpu::reset()
@@ -1195,6 +1196,7 @@ namespace emulator
             // OUT
             // Put data on the data bus            
             case 0xD3:
+                io.set(memory.get(state.PC), state.A);
                 state.PC += 1;
                 executedMachineCyles += 10;
                 break;
@@ -1337,7 +1339,7 @@ namespace emulator
             case 0xDF:
             case 0xEF:
             case 0xFF:
-                memory.setWord(state.SP - 2, state.getHL());
+                memory.setWord(state.SP - 2, state.PC);
                 state.SP -= 2;
                 state.PC = opCode & 0b00111000;
                 executedMachineCyles += 11;
@@ -1369,6 +1371,7 @@ namespace emulator
             // IN
             // Get data on the data bus      
             case 0xDB:
+                state.A = io.get(memory.get(state.PC));
                 state.PC += 1;
                 executedMachineCyles += 10;
                 break;
