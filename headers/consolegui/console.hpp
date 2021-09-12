@@ -65,16 +65,10 @@ namespace emulator
 
             void setTextColor(const Color foreground = Color::White, const Color background = Color::Black);
 
-            using KeyEventCallback = std::function<bool(const KEY_EVENT_RECORD&)>;
-            void run(KeyEventCallback keyEventCallback);
-            void exit() { isRunning_ = false;}
-
-            bool isRunning() const { return isRunning_;}
+            bool pollEvent(KEY_EVENT_RECORD& event);
 
         private:
             HANDLE inputHandle, outputHandle;
-            DWORD previousInputMode, previousOutputMode;
-
-            bool isRunning_ = false;     
+            DWORD previousInputMode, previousOutputMode;   
     };
 }

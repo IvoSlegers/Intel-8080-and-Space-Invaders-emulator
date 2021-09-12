@@ -5,9 +5,12 @@
 #include "opcode_info.hpp"
 #include "to_hex_string.hpp"
 
+#include "consolegui\console.hpp"
+
 namespace emulator
 {
-    ConsoleUI::ConsoleUI(const Cpu& cpu_, const Memory& memory_): cpu(cpu_), memory(memory_)
+    ConsoleUI::ConsoleUI(Console& console_, const Cpu& cpu_, const Memory& memory_): 
+        console(console_), cpu(cpu_), memory(memory_)
     {}
 
     void ConsoleUI::draw()

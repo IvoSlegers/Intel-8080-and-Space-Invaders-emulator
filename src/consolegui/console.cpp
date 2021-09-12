@@ -160,30 +160,25 @@ namespace emulator
         }
     }
 
-    void Console::run(KeyEventCallback keyEventCallback)
+    bool Console::pollEvent(KEY_EVENT_RECORD& event)
     {
-        isRunning_ = true;
+        DWORD numberOfEvents;
+        if (!GetNumberOfConsoleInputEvents(inputHandle, &numberOfEvents))
+            return false;
 
-        while (isRunning_)
-        {
-            INPUT_RECORD inputBuffer[16];
-            DWORD numberOfEventsRead;
+        if (numberOfEvents == 0)
+            return false;
 
-            if (!ReadConsoleInput(inputHandle, inputBuffer, 16, &numberOfEventsRead))
-            {
-                throw ConsoleException("Failed to read console input in Console::run.");
-            }
+        INPUT_RECORD record;
+        DWORD numberOfEventsRead;
+        if (!ReadConsoleInput(inputHandle, &record, 1, &numberOfEventsRead))
+            return false;
 
-            for (unsigned int i = 0; i < numberOfEventsRead; ++i)
-            {
-                INPUT_RECORD& event = inputBuffer[i];
+        if (record.EventType != KEY_EVENT)
+            return false;
 
-                if (event.EventType == KEY_EVENT)
-                {
-                    isRunning_ = isRunning_ && keyEventCallback(event.Event.KeyEvent);
-                }                    
-            }
-        }
+        event = record.Event.KeyEvent;
+
+        return true;
     }
-
 } // namespace emulator

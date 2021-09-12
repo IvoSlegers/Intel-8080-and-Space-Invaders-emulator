@@ -1,17 +1,19 @@
 #pragma once
 
-#include "consolegui\console.hpp"
 #include "int_types.hpp"
+
+#include <string>
 
 namespace emulator
 {
+    class Console;
     class Memory;
     struct Cpu;
 
     class ConsoleUI
     {
         public:
-            explicit ConsoleUI(const Cpu& state, const Memory& memory);
+            explicit ConsoleUI(Console& console, const Cpu& cpu, const Memory& memory);
 
             void draw();
 
@@ -25,9 +27,9 @@ namespace emulator
             void drawInstructions(word address, word len, short x, short y);
             word drawInstruction(word address, short x, short y);
 
+            Console& console;
+
             const Cpu& cpu;
             const Memory& memory;
-
-            Console console;
     };
 } // namespace emulator

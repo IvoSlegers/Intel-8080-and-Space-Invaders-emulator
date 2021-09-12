@@ -1,17 +1,21 @@
 #pragma once
 
-#include <SFML/Window.hpp>
+#include <SFML/Graphics.hpp>
 
 namespace emulator
 {
+    class Application;
+
     class UI
     {
         public:
             explicit UI();
 
-            void run();
+            void run(Application& parentApplication);
 
         private:
-            sf::Window window;
+            void draw();
+            
+            sf::RenderWindow window;
     };
 } // namespace emulator
