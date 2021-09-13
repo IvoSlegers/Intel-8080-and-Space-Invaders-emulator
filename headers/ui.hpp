@@ -4,18 +4,18 @@
 
 namespace emulator
 {
-    class Application;
+    // class Application;
 
-    class UI
-    {
-        public:
-            explicit UI();
+    // class UI
+    // {
+    //     public:
+    //         explicit UI();
 
-            void run(Application& parentApplication);
+    //         void run(Application& parentApplication);
 
-        private:
-            void draw();
+    //     private:
+    //         void draw();
             
-            sf::RenderWindow window;
-    };
+    //         sf::RenderWindow window;
+    // };
 } // namespace emulator

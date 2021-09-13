@@ -6,7 +6,7 @@
 
 #include "consolegui/console.hpp"
 #include "console_ui.hpp"
-#include "ui.hpp"
+#include "spaceinvaders_video.hpp"
 
 #include <SFML/Graphics.hpp>
 
@@ -35,5 +35,6 @@ namespace emulator
             Console console;
 
             ConsoleUI consoleUI;
+            SpaceInvadersVideo video;
     };
 } // namespace emulator

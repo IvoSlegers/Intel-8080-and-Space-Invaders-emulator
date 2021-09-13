@@ -8,7 +8,7 @@ namespace emulator
 {
     Application::Application(): memory(0x2000, 0x2000), io(), cpu(memory, io),
         window(sf::VideoMode(800, 600), "intel 8080 - Space Invaders"), console(),
-        consoleUI(console, cpu, memory)
+        consoleUI(console, cpu, memory), video(window, memory)
     {}
 
     void Application::run()
@@ -62,6 +62,8 @@ namespace emulator
     void Application::draw()
     {
         window.clear(sf::Color::Black);
+
+        //video.draw();
 
         window.display();
     }
