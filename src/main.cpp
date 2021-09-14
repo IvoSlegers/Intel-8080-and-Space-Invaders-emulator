@@ -9,8 +9,18 @@
 - draw video memory
 */
 
+#include <SFML/System.hpp>
+#include <fstream>
+#include <chrono>
+
 int main(void)
 {
+    std::ofstream logFile("error_log.txt", std::ios_base::app);
+    logFile << "--------------------------------------------------------\n";
+    std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    logFile << "Log file of run at " <<  std::ctime(&now) << '\n';
+    sf::err().rdbuf(logFile.rdbuf());
+
     try
     {
         emulator::Application app;

@@ -47,6 +47,8 @@
         "streambuf": "cpp",
         "typeinfo": "cpp",
         "valarray": "cpp",
-        "bitset": "cpp"
+        "bitset": "cpp",
+        "chrono": "cpp",
+        "ratio": "cpp"
     }
 }

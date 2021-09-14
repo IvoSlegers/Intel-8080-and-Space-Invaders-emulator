@@ -3,6 +3,7 @@
 #include "to_hex_string.hpp"
 
 #include <iostream>
+#include <stdlib.h>
 
 namespace emulator
 {
@@ -16,6 +17,23 @@ namespace emulator
         memory.loadROMFromFile("invaders.rom");
 
         window.setFramerateLimit(30);
+
+        for (int i = 0x2400; i < 0x3fff; ++i)
+        {
+            memory[i] = rand() % 256;
+        }
+
+        // try
+        // {
+        //     for (int i = 0; i < 50'000; ++i)
+        //     {
+        //         cpu.executeInstructionCycle();
+        //     }
+        // }
+        // catch (EmulatorException& exception)
+        // {
+        //     consoleUI.draw();
+        // }
 
         consoleUI.draw();
         
@@ -35,12 +53,39 @@ namespace emulator
 
     void Application::onConsoleKeyEvent(const KEY_EVENT_RECORD& event)
     {
+        if (event.uChar.AsciiChar == 'q')
+            window.close();
+
+        if (event.uChar.AsciiChar == 'r')
+            cpu.reset();
+
+        if (event.uChar.AsciiChar == 's' && event.bKeyDown)
+        {
+            cpu.executeInstructionCycle();
+            consoleUI.draw();
+        }
+
+        if (event.uChar.AsciiChar == 'f' && event.bKeyDown)
+        {
+            for (int i = 0; i < 100; ++i)
+                cpu.executeInstructionCycle();
+            consoleUI.draw();
+        }
     }
 
     void Application::onEvent(const sf::Event& event)
     {
         if (event.type == sf::Event::Closed)
             window.close();
+
+        if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Q)
+            window.close();
+
+        if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::S)
+        {
+            cpu.executeInstructionCycle();
+            consoleUI.draw();
+        }
     }
 
     void Application::handleEvents()
@@ -56,14 +101,14 @@ namespace emulator
 
     void Application::update(float delta)
     {
-
+        video.update(0, 0, SpaceInvadersVideo::crtWidth, SpaceInvadersVideo::crtHeight, sf::Color::Red, sf::Color::Blue);
     }
 
     void Application::draw()
     {
         window.clear(sf::Color::Black);
 
-        //video.draw();
+        video.draw();
 
         window.display();
     }

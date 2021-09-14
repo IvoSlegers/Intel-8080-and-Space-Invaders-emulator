@@ -259,48 +259,56 @@ namespace emulator
             // B
             case 0x06:
                 state.B = memory.get(state.PC);
+                state.PC += 1;
                 executedMachineCyles += 7;
                 break;
 
             // D
             case 0x16:
                 state.D = memory.get(state.PC);
+                state.PC += 1;
                 executedMachineCyles += 7;
                 break;
 
             // H
             case 0x26:
                 state.H = memory.get(state.PC);
+                state.PC += 1;
                 executedMachineCyles += 7;
                 break;
 
             // M
             case 0x36:
                 memory.set(state.getHL(), memory.get(state.PC));
+                state.PC += 1;
                 executedMachineCyles += 10;
                 break;
 
             // C
             case 0x0E:
                 state.C = memory.get(state.PC);
+                state.PC += 1;
                 executedMachineCyles += 7;
                 break;
 
             // E
             case 0x1E:
                 state.E = memory.get(state.PC);
+                state.PC += 1;
                 executedMachineCyles += 7;
                 break;
 
             // L
             case 0x2E:
                 state.L = memory.get(state.PC);
+                state.PC += 1;
                 executedMachineCyles += 7;
                 break;
 
             // A
             case 0x3E:
                 state.A = memory.get(state.PC);
+                state.PC += 1;
                 executedMachineCyles += 7;
                 break;
 
@@ -1568,6 +1576,8 @@ namespace emulator
     {
         if (condition)
             state.PC = memory.getWord(state.PC);
+        else
+            state.PC += 2;
 
         executedMachineCyles += 10;
     }
@@ -1576,14 +1586,17 @@ namespace emulator
     {
         if (condition)
         {
-            memory.setWord(state.SP - 2, state.getHL());
+            memory.setWord(state.SP - 2, state.PC + 2);
             state.SP -= 2;
             state.PC = memory.getWord(state.PC);
 
             executedMachineCyles += 17;
         }
         else
+        {
+            state.PC += 2;
             executedMachineCyles += 11;
+        }            
     }
 
     void Cpu::setEnableInterrupts(bool enabled)

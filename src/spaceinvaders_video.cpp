@@ -1,36 +1,76 @@
 #include "spaceinvaders_video.hpp"
 
+#include "emulator_exception.hpp"
+#include "memory.hpp"
+
 #include <SFML/Graphics.hpp>
 
 namespace emulator
 {
     SpaceInvadersVideo::SpaceInvadersVideo(sf::RenderWindow& window_, Memory& memory_): 
-        window(window_), texture(), sprite(texture), memory(memory_)
+        window(window_), memory(memory_)
     {
-        texture.create(width, height);
-        sprite.setPosition(100, 100);
+        texture.create(crtWidth, crtHeight);
+        texture.setSmooth(false);
 
-        videoData = std::make_unique<byte[]>(static_cast<std::size_t>(width * height));
+        sprite.setTexture(texture);
 
-        for (int i = 0; i < width; ++i)
+        sprite.setPosition(50, 50);
+        sprite.setScale(sf::Vector2f(2,2));
+
+        videoData = std::make_unique<byte[]>(static_cast<std::size_t>(4 * crtWidth * crtHeight));
+
+        outline.setOutlineColor(sf::Color::White);
+        outline.setOutlineThickness(1.0f);
+        outline.setPosition(sf::Vector2f(49, 49));
+        outline.setSize(sf::Vector2f(2 * crtWidth + 2, 2 * crtHeight + 2));
+    }
+
+    void SpaceInvadersVideo::update(unsigned short x, unsigned short y, 
+        unsigned short width, unsigned short height,
+        sf::Color foregroundColor, sf::Color backgroundColor)
+    {
+        if (x < 0 || (x + width) > crtWidth || y < 0 || (y + height) > crtHeight)
+            throw EmulatorException("Invalid update rectangle specified.");
+
+        for (unsigned short j = 0; j < height; ++j)
         {
-            for (int j = 0; j < height; ++j)
+            unsigned short pixelY = y + j;
+
+            for (unsigned short i = 0; i < width; ++i)
             {
-                videoData[width * i + j] = i;
-                videoData[width * i + j + 1] = j;
-                videoData[width * i + j + 2] = 128;
+                unsigned short pixelX = x + i;                
+                unsigned short pixelNumber = pixelY * crtWidth + pixelX;
+
+                word address = videoBufferAddress + (pixelNumber / 8);
+                byte bitNumber = pixelNumber % 8;
+
+                byte value = memory.get(address);
+                bool pixelEnabled = (value >> (7-bitNumber)) & 1;
+
+                sf::Color color = pixelEnabled ? foregroundColor : backgroundColor;
+
+                unsigned int index = 4 * pixelNumber;
+                
+                videoData[index] = color.r;
+                videoData[index + 1] = color.g;
+                videoData[index + 2] = color.b;
+                videoData[index + 3] = color.a;
             }
         }
+
+        textureUpdateRequired = true;
     }
 
     void SpaceInvadersVideo::draw()
     {
-        if (videoDataUpdateRequired)
+        if (textureUpdateRequired)
         {
             texture.update(videoData.get());
-            videoDataUpdateRequired = false;
+            textureUpdateRequired = false;
         }
         
+        window.draw(outline);
         window.draw(sprite);
     }
 
