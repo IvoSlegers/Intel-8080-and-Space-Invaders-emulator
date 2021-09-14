@@ -23,17 +23,17 @@ namespace emulator
             memory[i] = rand() % 256;
         }
 
-        // try
-        // {
-        //     for (int i = 0; i < 50'000; ++i)
-        //     {
-        //         cpu.executeInstructionCycle();
-        //     }
-        // }
-        // catch (EmulatorException& exception)
-        // {
-        //     consoleUI.draw();
-        // }
+        try
+        {
+            for (int i = 0; i < 50'000; ++i)
+            {
+                cpu.executeInstructionCycle();
+            }
+        }
+        catch (EmulatorException& exception)
+        {
+            consoleUI.draw();
+        }
 
         consoleUI.draw();
         

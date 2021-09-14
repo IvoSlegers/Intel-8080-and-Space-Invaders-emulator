@@ -10,7 +10,7 @@ namespace emulator
         public:
             virtual ~IO() {}
 
-            virtual byte get(byte port) = 0;
+            virtual byte get(byte port) const = 0;
             virtual void set(byte port, byte value) = 0;
     };
 
@@ -19,7 +19,7 @@ namespace emulator
         public:
             virtual ~EmptyIO() {}
 
-            virtual byte get(byte port)
+            virtual byte get(byte port) const
             {
                 throw EmulatorException("Reading from IO port is not possible. IO operations are not implemented.");
             }
