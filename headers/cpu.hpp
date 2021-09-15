@@ -23,6 +23,8 @@ namespace emulator
             const std::size_t getExecutedInstructionCyles() const { return executedInstructionCycles; }
             const std::size_t getExecutedMachineCyles() const { return executedMachineCyles; }
 
+            void issueRSTInterrupt(byte address);
+
         private:
             Memory& memory;
             IO& io;
@@ -50,6 +52,7 @@ namespace emulator
             void executeConditionalJMP(bool condition);
             void executeConditionalCALL(bool condition);
 
+            void executeRST(byte address);
             void setEnableInterrupts(bool enabled);
             void halt();
     };

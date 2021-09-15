@@ -1347,10 +1347,7 @@ namespace emulator
             case 0xDF:
             case 0xEF:
             case 0xFF:
-                memory.setWord(state.SP - 2, state.PC);
-                state.SP -= 2;
-                state.PC = opCode & 0b00111000;
-                executedMachineCyles += 11;
+                executeRST(opCode & 0b0011'1000);
                 break;
 
             case 0xC9:
@@ -1449,6 +1446,17 @@ namespace emulator
         }
 
         ++executedInstructionCycles;
+    }
+
+    void Cpu::issueRSTInterrupt(byte address)
+    {
+        #if EMULATOR_CHECK_INVALID_OPCODES
+            if (address > 56 || (address % 8) != 0)
+                throw EmulatorException("Invalid address (0x" + toHexString(address) + ") supplied to for RST interrupt.");
+        #endif
+
+        if (state.interruptsEnabled)
+            executeRST(address);        
     }
 
     void Cpu::setZSPFlags(byte result)
@@ -1599,9 +1607,17 @@ namespace emulator
         }            
     }
 
+    void Cpu::executeRST(byte address)
+    {
+        memory.setWord(state.SP - 2, state.PC);
+        state.SP -= 2;
+        state.PC = address;
+        executedMachineCyles += 11;
+    }
+
     void Cpu::setEnableInterrupts(bool enabled)
     {
-        return;
+        state.interruptsEnabled = enabled;
     }
 
     void Cpu::halt()

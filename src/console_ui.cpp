@@ -67,6 +67,9 @@ namespace emulator
         console.setCursorPosition(40, 1);
         console.write("Executed cycles: " + std::to_string(cpu.getExecutedMachineCyles()));
 
+        console.setCursorPosition(40, 2);
+        console.write(std::string("Interruptions ") + (state.interruptsEnabled ? "enabled" : "disabled"));
+
         drawInstructions(state.PC, 16, 0, 6);
     }
 

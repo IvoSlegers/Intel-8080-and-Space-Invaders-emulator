@@ -6,27 +6,28 @@
 #include <iostream>
 
 // TODO
-// - implement IO with bitshifting
 // - implement screen drawing interrupt system
 // - implement sound
 // - implement port 6 output = reset
 // - add a parameter scaling factor to video component
-// - Think very carefully about whether (value >> (bitNumber)) & 1; or (value >> (7 - bitNumber)) & 1; is correct.
+// - Let executeInstructionCycle + issueInterrupt return the number of machine cycles
 
+#if EMULATOR_LOG_SFML_ERRORS
+    #include <SFML/System.hpp>
+    #include <fstream>
+    #include <chrono>
+#endif
 
-#include <SFML/System.hpp>
-#include <fstream>
-#include <chrono>
 
 int main(void)
 {
-    /* Enable this block if sfml/opengl errors should be written to a error log file (error_log.txt) 
-    std::ofstream logFile("error_log.txt", std::ios_base::app);
-    logFile << "--------------------------------------------------------\n";
-    std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    logFile << "Log file of run at " <<  std::ctime(&now) << '\n';
-    sf::err().rdbuf(logFile.rdbuf());
-    */
+    #if EMULATOR_LOG_SFML_ERRORS
+        std::ofstream logFile("error_log.txt", std::ios_base::app);
+        logFile << "--------------------------------------------------------\n";
+        std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+        logFile << "Log file of run at " <<  std::ctime(&now) << '\n';
+        sf::err().rdbuf(logFile.rdbuf());
+    #endif
 
     try
     {

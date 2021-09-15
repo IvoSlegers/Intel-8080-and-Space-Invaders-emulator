@@ -18,14 +18,9 @@ namespace emulator
 
         window.setFramerateLimit(30);
 
-        for (int i = 0x2400; i < 0x3fff; ++i)
-        {
-            memory[i] = rand() % 256;
-        }
-
         try
         {
-            for (int i = 0; i < 50'000; ++i)
+            for (int i = 0; i < 42'000; ++i)
             {
                 cpu.executeInstructionCycle();
             }
