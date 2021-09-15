@@ -33,6 +33,7 @@ namespace emulator
         catch (EmulatorException& exception)
         {
             consoleUI.draw();
+            throw;
         }
 
         consoleUI.draw();

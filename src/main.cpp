@@ -9,6 +9,10 @@
 // - implement IO with bitshifting
 // - implement screen drawing interrupt system
 // - implement sound
+// - implement port 6 output = reset
+// - add a parameter scaling factor to video component
+// - Think very carefully about whether (value >> (bitNumber)) & 1; or (value >> (7 - bitNumber)) & 1; is correct.
+
 
 #include <SFML/System.hpp>
 #include <fstream>

@@ -2,7 +2,7 @@
 
 #include "memory.hpp"
 #include "cpu.hpp"
-#include "io.hpp"
+#include "spaceinvaders_io.hpp"
 
 #include "consolegui/console.hpp"
 #include "console_ui.hpp"
@@ -28,7 +28,7 @@ namespace emulator
             void draw();
 
             Memory memory;
-            EmptyIO io;
+            SpaceInvadersIO io;
             Cpu cpu;
 
             sf::RenderWindow window;
