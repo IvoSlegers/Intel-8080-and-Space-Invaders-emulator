@@ -17,6 +17,11 @@ namespace emulator
 
             void draw();
 
+            void beginDialog(const std::string& prompt);
+            std::string endDialog();
+
+            bool isInDialogMode() const { return isInDialogMode_; }
+
         private:           
             void drawCpuState();
 
@@ -27,7 +32,11 @@ namespace emulator
             void drawInstructions(word address, word len, short x, short y);
             word drawInstruction(word address, short x, short y);
 
+            void drawHelp();
+
             Console& console;
+
+            bool isInDialogMode_ = false;
 
             const Cpu& cpu;
             const Memory& memory;

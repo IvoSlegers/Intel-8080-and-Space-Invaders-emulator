@@ -108,9 +108,9 @@ namespace emulator
         bit 7 = DIP7 Coin info displayed in demo screen 0=ON
         */
 
-        bool twoPlayerFire = sf::Keyboard::isKeyPressed(keyMapping.at("Two Player Fire"));
-        bool twoPlayerLeft = sf::Keyboard::isKeyPressed(keyMapping.at("Two Player Left"));
-        bool twoPlayerRight = sf::Keyboard::isKeyPressed(keyMapping.at("Two Player Right"));
+        bool twoPlayerFire = sf::Keyboard::isKeyPressed(keyMapping.at("2 Player Fire"));
+        bool twoPlayerLeft = sf::Keyboard::isKeyPressed(keyMapping.at("2 Player Left"));
+        bool twoPlayerRight = sf::Keyboard::isKeyPressed(keyMapping.at("2 Player Right"));
 
         return 0b0000'0000 | dip3 | (dip5 << 1) | (dip6 << 3) | (twoPlayerFire << 4) |
             (twoPlayerLeft << 5) | (twoPlayerRight << 6) | (dip7 << 7);

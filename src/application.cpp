@@ -2,9 +2,6 @@
 
 #include "to_hex_string.hpp"
 
-#include <iostream>
-#include <stdlib.h>
-
 namespace emulator
 {
     Application::Application(): memory(0x2000, 0x2000), io(), cpu(memory, io),
@@ -16,22 +13,9 @@ namespace emulator
     {
         memory.loadROMFromFile("invaders.rom");
 
-        window.setFramerateLimit(30);
+        window.setFramerateLimit(60);
 
-        try
-        {
-            for (int i = 0; i < 42'000; ++i)
-            {
-                cpu.executeInstructionCycle();
-            }
-        }
-        catch (EmulatorException& exception)
-        {
-            consoleUI.draw();
-            throw;
-        }
-
-        consoleUI.draw();
+        //consoleUI.draw();
         
         sf::Clock frametimeClock;
         while (window.isOpen())
@@ -58,13 +42,6 @@ namespace emulator
         if (event.uChar.AsciiChar == 's' && event.bKeyDown)
         {
             cpu.executeInstructionCycle();
-            consoleUI.draw();
-        }
-
-        if (event.uChar.AsciiChar == 'f' && event.bKeyDown)
-        {
-            for (int i = 0; i < 100; ++i)
-                cpu.executeInstructionCycle();
             consoleUI.draw();
         }
     }
@@ -97,7 +74,66 @@ namespace emulator
 
     void Application::update(float delta)
     {
-        video.update(0, 0, SpaceInvadersVideo::crtWidth, SpaceInvadersVideo::crtHeight, sf::Color::Red, sf::Color::Blue);
+        // machineCyclesToBeExecuted += delta * 2'000'000;
+
+        // while (machineCyclesToBeExecuted > 0)
+        // {
+        //     machineCyclesToBeExecuted -= cpu.executeInstructionCycle();
+        // }
+
+        // if (screenTimer.getElapsedTime().asSeconds() > 1/120.0f)
+        // {
+        //     if (upperHalf)
+        //     {
+        //         video.update(0, 0, SpaceInvadersVideo::crtWidth, SpaceInvadersVideo::crtHeight/2,
+        //         sf::Color::White, sf::Color::Black);
+        //         cpu.issueRSTInterrupt(Cpu::RestartInstructions::RST1);
+        //     }
+        //     else
+        //     {
+        //         video.update(0, SpaceInvadersVideo::crtHeight/2, SpaceInvadersVideo::crtWidth,
+        //             SpaceInvadersVideo::crtHeight/2, sf::Color::White, sf::Color::Black);
+        //         cpu.issueRSTInterrupt(Cpu::RestartInstructions::RST2);
+        //     }
+
+        //     screenTimer.restart();
+        //     upperHalf = !upperHalf;
+        // }
+
+        if (running)
+        {
+            machineCyclesToBeExecuted = 2'000'000/120;
+            while (machineCyclesToBeExecuted > 0 && running)
+            {
+                machineCyclesToBeExecuted -= cpu.executeInstructionCycle();
+                if (breakpoints.count(cpu.getState().PC) != 0)
+                {
+                    triggerBreakpoint();
+                    return;
+                }
+                    
+            }
+
+            video.update(0, 0, SpaceInvadersVideo::crtWidth, SpaceInvadersVideo::crtHeight/2,
+            sf::Color::White, sf::Color::Black);
+            cpu.issueRSTInterrupt(Cpu::RestartInstructions::RST1);
+
+            machineCyclesToBeExecuted = 2'000'000/120;
+            while (machineCyclesToBeExecuted > 0 && running)
+            {
+                machineCyclesToBeExecuted -= cpu.executeInstructionCycle();
+                if (breakpoints.count(cpu.getState().PC) != 0)
+                {
+                    triggerBreakpoint();
+                    return;
+                }
+                    
+            }
+
+            video.update(0, SpaceInvadersVideo::crtHeight/2, SpaceInvadersVideo::crtWidth,
+                SpaceInvadersVideo::crtHeight/2, sf::Color::White, sf::Color::Black);
+            cpu.issueRSTInterrupt(Cpu::RestartInstructions::RST2);
+        }        
     }
 
     void Application::draw()
@@ -107,6 +143,12 @@ namespace emulator
         video.draw();
 
         window.display();
+    }
+
+    void Application::triggerBreakpoint()
+    {
+        consoleUI.draw();
+        running = false;
     }
 
 } // namespace emulator

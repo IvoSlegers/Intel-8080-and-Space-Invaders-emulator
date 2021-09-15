@@ -8,7 +8,7 @@ namespace emulator
 {
     struct Size
     {
-        short width, heigh;
+        short width, height;
     };
 
     struct Position
@@ -64,6 +64,8 @@ namespace emulator
             Size getBufferSize() const;
 
             void setTextColor(const Color foreground = Color::White, const Color background = Color::Black);
+
+            void setEchoInput(bool enabled);
 
             bool pollEvent(KEY_EVENT_RECORD& event);
 

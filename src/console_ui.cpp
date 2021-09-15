@@ -17,7 +17,25 @@ namespace emulator
     {
         console.clear();
         drawCpuState();
-        console.setCursorPosition(0, console.getScreenSize().heigh);
+        console.setCursorPosition(0, console.getScreenSize().height);
+    }
+
+    void ConsoleUI::beginDialog(const std::string& prompt)
+    {
+        console.setEchoInput(true);
+
+        short height = console.getScreenSize().height;
+
+        console.setCursorPosition(0, height - 1);
+        console.write(prompt);
+
+        console.setCursorPosition(0, height);
+    }
+
+    std::string ConsoleUI::endDialog()
+    {
+        console.setEchoInput(false);
+        return "No";
     }
 
     void ConsoleUI::drawCpuState()
@@ -145,5 +163,18 @@ namespace emulator
         console.write(formatInstructionArguments(opCode, byte2, byte3));
 
         return instructionLengths[opCode];
+    }
+
+    void ConsoleUI::drawHelp()
+    {
+        short y = 6;
+        console.setCursorPosition(54, y++);
+        console.write("q: Quit");
+
+        console.setCursorPosition(54, y++);
+        console.write("r: Reset");
+
+        console.setCursorPosition(54, y++);
+        console.write("s: Single step");
     }
 } // namespace emulator

@@ -23,7 +23,7 @@ namespace emulator
         DWORD newMode = previousOutputMode & (~ENABLE_WRAP_AT_EOL_OUTPUT);
         SetConsoleMode(outputHandle, newMode);
 
-        newMode = previousInputMode | ENABLE_ECHO_INPUT;
+        newMode = previousInputMode & ~ENABLE_ECHO_INPUT;
         SetConsoleMode(inputHandle, newMode);
     }
 
@@ -134,7 +134,7 @@ namespace emulator
         WindowPosition position = getWindowPosition();
         Size size;
         size.width = position.right - position.left;
-        size.heigh = position.bottom - position.top;
+        size.height = position.bottom - position.top;
         return size;
     }
 
@@ -158,6 +158,23 @@ namespace emulator
         {
             throw ConsoleException("Could not set text attributes in Console::setColors.");
         }
+    }
+
+    void Console::setEchoInput(bool enabled)
+    {
+        DWORD mode;
+        GetConsoleMode(inputHandle, &mode);
+
+        if (enabled)
+        {
+            mode |= ENABLE_ECHO_INPUT;
+        }
+        else
+        {
+            mode &= ~ENABLE_ECHO_INPUT;
+        }
+
+        SetConsoleMode(inputHandle, mode);
     }
 
     bool Console::pollEvent(KEY_EVENT_RECORD& event)

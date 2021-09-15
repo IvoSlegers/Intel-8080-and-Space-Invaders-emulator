@@ -10,6 +10,8 @@
 
 #include <SFML/Graphics.hpp>
 
+#include <set>
+
 namespace emulator
 {
     class Application
@@ -36,5 +38,14 @@ namespace emulator
 
             ConsoleUI consoleUI;
             SpaceInvadersVideo video;
+
+            int machineCyclesToBeExecuted = 0;
+            sf::Clock screenTimer;
+            bool upperHalf = true;
+
+            bool running = false;
+            void triggerBreakpoint();
+
+            std::set<word> breakpoints;
     };
 } // namespace emulator

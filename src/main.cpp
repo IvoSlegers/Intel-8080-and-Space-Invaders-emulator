@@ -2,6 +2,7 @@
 
 #include "consolegui/console_exception.hpp"
 #include "emulator_exception.hpp"
+#include "defines.hpp"
 
 #include <iostream>
 
@@ -11,6 +12,9 @@
 // - implement port 6 output = reset
 // - add a parameter scaling factor to video component
 // - Let executeInstructionCycle + issueInterrupt return the number of machine cycles
+// - Wrap all Space Invaders specific stuff into a SpaceInvadersCabinet class.
+// - Implement dialogs in ConsoleUI
+// - Implement breakpoints system
 
 #if EMULATOR_LOG_SFML_ERRORS
     #include <SFML/System.hpp>
@@ -43,6 +47,11 @@ int main(void)
     {
         std::cerr << "Emulator exception: " << exception.getMessage() << '\n';
         std::cin.get();     
+    }
+    catch (const std::exception& exception)
+    {
+        std::cerr << "Std exception: " << exception.what() << '\n';
+        std::cin.get();
     }
 
     return 0;

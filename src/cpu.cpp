@@ -17,8 +17,10 @@ namespace emulator
         state.reset();
     }
 
-    void Cpu::executeInstructionCycle()
+    std::size_t Cpu::executeInstructionCycle()
     {
+        std::size_t previousExecutedMachineCycles = executedMachineCyles;
+
         byte opCode = memory.get(state.PC);
 
         // According to table on page 2-16 of i8080 manual the program counter is always first
@@ -1446,9 +1448,11 @@ namespace emulator
         }
 
         ++executedInstructionCycles;
+
+        return executedMachineCyles - previousExecutedMachineCycles;
     }
 
-    void Cpu::issueRSTInterrupt(byte address)
+    std::size_t Cpu::issueRSTInterrupt(byte address)
     {
         #if EMULATOR_CHECK_INVALID_OPCODES
             if (address > 56 || (address % 8) != 0)
@@ -1456,7 +1460,12 @@ namespace emulator
         #endif
 
         if (state.interruptsEnabled)
-            executeRST(address);        
+        {
+            executeRST(address);
+            return 11;
+        }
+        else
+            return 0;             
     }
 
     void Cpu::setZSPFlags(byte result)

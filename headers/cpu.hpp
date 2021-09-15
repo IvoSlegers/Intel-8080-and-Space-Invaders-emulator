@@ -11,11 +11,25 @@ namespace emulator
     class Cpu
     {
         public:
+            enum class RestartInstructions : byte
+            {
+                RST0 = 0,
+                RST1 = 8,
+                RST2 = 16,
+                RST3 = 24,
+                RST4 = 32,
+                RST5 = 40,
+                RST6 = 48,
+                RST7 = 56
+            };
+            
+        public:
             explicit Cpu(Memory&, IO&);
 
             void reset();
 
-            void executeInstructionCycle();
+            // Returns the number of machine cycles needed to execute the command.
+            std::size_t executeInstructionCycle();
 
             const Memory& getMemory() const { return memory;}
             const CpuState& getState() const { return state;}
@@ -23,7 +37,13 @@ namespace emulator
             const std::size_t getExecutedInstructionCyles() const { return executedInstructionCycles; }
             const std::size_t getExecutedMachineCyles() const { return executedMachineCyles; }
 
-            void issueRSTInterrupt(byte address);
+            // Returns the number of machine cycles needed to execute the command.
+            std::size_t issueRSTInterrupt(byte address);
+
+            std::size_t issueRSTInterrupt(RestartInstructions instruction)
+            {
+                return issueRSTInterrupt(static_cast<byte>(instruction));
+            }
 
         private:
             Memory& memory;
