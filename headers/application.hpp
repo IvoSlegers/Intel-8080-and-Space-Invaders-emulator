@@ -21,6 +21,11 @@ namespace emulator
 
             void run();
 
+            void reset();
+            void quit();
+            void executeSingleStep();
+            void toggleBreakpoint(word address);
+
         private:
             void onConsoleKeyEvent(const KEY_EVENT_RECORD& event);
             void onEvent(const sf::Event& event);
@@ -47,5 +52,8 @@ namespace emulator
             void triggerBreakpoint();
 
             std::set<word> breakpoints;
+
+            friend ConsoleUI;
+            friend InstructionsDisplay;
     };
 } // namespace emulator

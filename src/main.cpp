@@ -13,8 +13,10 @@
 // - add a parameter scaling factor to video component
 // - Let executeInstructionCycle + issueInterrupt return the number of machine cycles
 // - Wrap all Space Invaders specific stuff into a SpaceInvadersCabinet class.
-// - Implement dialogs in ConsoleUI
 // - Implement breakpoints system
+// Possible interesting breakpoint 2778
+// - Implement draw dialog prompt in draw function of consoleUI.
+// - Using a set for breakpoints is potentially slow, replace by large bool array?
 
 #if EMULATOR_LOG_SFML_ERRORS
     #include <SFML/System.hpp>

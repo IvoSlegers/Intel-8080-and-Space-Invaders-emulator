@@ -22,6 +22,8 @@ i.e. (for sfml):
 "-lsfml-system-d",
 "-lsfml-window-d",
 "-lopengl32",
+
+mingw32-make -j 8
 */
 
 {
@@ -30,7 +32,7 @@ i.e. (for sfml):
 		{
 			"type": "cppbuild",
 			"label": "g++ Build project (Debug)",
-			"command": "C:\\Program Files\\mingw-w64\\x86_64-8.1.0-win32-seh-rt_v6-rev0\\mingw64\\bin\\g++.exe",
+			"command": "g++",
 			"args": [
 				"-g",
 				"${workspaceFolder}\\src\\*.cpp",
@@ -58,13 +60,13 @@ i.e. (for sfml):
 				"$gcc"
 			],
 			"group": "build",
-			"detail": "compiler: \"C:\\Program Files\\mingw-w64\\x86_64-8.1.0-win32-seh-rt_v6-rev0\\mingw64\\bin\\g++.exe\""
+			"detail": "compiler: g++.exe"
 		},
 
 		{
 			"type": "cppbuild",
 			"label": "g++ Build project (Release)",
-			"command": "C:\\Program Files\\mingw-w64\\x86_64-8.1.0-win32-seh-rt_v6-rev0\\mingw64\\bin\\g++.exe",
+			"command": "g++",
 			"args": [
 				"${workspaceFolder}\\src\\*.cpp",
 				"${workspaceFolder}\\src\\consolegui\\*.cpp",

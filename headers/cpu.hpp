@@ -35,7 +35,7 @@ namespace emulator
             const CpuState& getState() const { return state;}
 
             const std::size_t getExecutedInstructionCyles() const { return executedInstructionCycles; }
-            const std::size_t getExecutedMachineCyles() const { return executedMachineCyles; }
+            const std::size_t getExecutedMachineCyles() const { return executedMachineCycles; }
 
             // Returns the number of machine cycles needed to execute the command.
             std::size_t issueRSTInterrupt(byte address);
@@ -51,7 +51,7 @@ namespace emulator
             CpuState state;
 
             std::size_t executedInstructionCycles = 0;
-            std::size_t executedMachineCyles = 0;
+            std::size_t executedMachineCycles = 0;
 
             void setZSPFlags(byte result);
 

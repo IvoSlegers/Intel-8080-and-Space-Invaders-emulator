@@ -13,13 +13,13 @@ namespace emulator
 
     void Cpu::reset()
     {
-        executedInstructionCycles = executedMachineCyles = 0;
+        executedInstructionCycles = executedMachineCycles = 0;
         state.reset();
     }
 
     std::size_t Cpu::executeInstructionCycle()
     {
-        std::size_t previousExecutedMachineCycles = executedMachineCyles;
+        std::size_t previousExecutedMachineCycles = executedMachineCycles;
 
         byte opCode = memory.get(state.PC);
 
@@ -45,7 +45,7 @@ namespace emulator
             case 0x28:
             case 0x38:
             #endif
-                executedMachineCyles += 4;
+                executedMachineCycles += 4;
                 break;
 
             // LXI RP, Load register pair immediate
@@ -56,28 +56,28 @@ namespace emulator
             case 0x01:
                 state.setBC(memory.getWord(state.PC));
                 state.PC += 2;
-                executedMachineCyles += 10;
+                executedMachineCycles += 10;
                 break;
 
             // DE
             case 0x11:
                 state.setDE(memory.getWord(state.PC));
                 state.PC += 2;
-                executedMachineCyles += 10;
+                executedMachineCycles += 10;
                 break;
 
             // HL
             case 0x21:
                 state.setHL(memory.getWord(state.PC));
                 state.PC += 2;
-                executedMachineCyles += 10;
+                executedMachineCycles += 10;
                 break;
 
             // SP
             case 0x31:
                 state.SP = memory.getWord(state.PC);
                 state.PC += 2;
-                executedMachineCyles += 10;
+                executedMachineCycles += 10;
                 break;
 
             // STAX, store accumulator indirect.
@@ -86,13 +86,13 @@ namespace emulator
             // BC
             case 0x02:
                 memory.set(state.getBC(), state.A);
-                executedMachineCyles += 7;
+                executedMachineCycles += 7;
                 break;
 
             // DE
             case 0x12:
                 memory.set(state.getDE(), state.A);
-                executedMachineCyles += 7;
+                executedMachineCycles += 7;
                 break;
 
             // SHLD
@@ -101,7 +101,7 @@ namespace emulator
                 address = memory.getWord(state.PC);
                 memory.setWord(address, state.getHL());
                 state.PC += 2;
-                executedMachineCyles += 16;
+                executedMachineCycles += 16;
                 break;
 
             // STA 
@@ -110,7 +110,7 @@ namespace emulator
                 address = memory.getWord(state.PC);
                 memory.set(address, state.A);
                 state.PC += 2;
-                executedMachineCyles += 13;
+                executedMachineCycles += 13;
                 break;
 
             // INX
@@ -119,25 +119,25 @@ namespace emulator
             // BC
             case 0x03:
                 state.setBC(state.getBC() + 1);
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             // DE
             case 0x13:
                 state.setDE(state.getDE() + 1);
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             // HL
             case 0x23:
                 state.setHL(state.getHL() + 1);
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             // SP
             case 0x33:
                 ++state.SP;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             // DCX
@@ -146,25 +146,25 @@ namespace emulator
             // BC
             case 0x0B:
                 state.setBC(state.getBC() - 1);
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             // DE
             case 0x1B:
                 state.setDE(state.getDE() - 1);
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             // HL
             case 0x2B:
                 state.setHL(state.getHL() - 1);
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             // SP
             case 0x3B:
                 --state.SP;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             // INR, increase register by one
@@ -188,7 +188,7 @@ namespace emulator
             // M
             case 0x34:
                 executeINR(memory[state.getHL()]);
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             // C
@@ -232,7 +232,7 @@ namespace emulator
             // M
             case 0x35:
                 executeDCR(memory[state.getHL()]);
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             // C
@@ -262,56 +262,56 @@ namespace emulator
             case 0x06:
                 state.B = memory.get(state.PC);
                 state.PC += 1;
-                executedMachineCyles += 7;
+                executedMachineCycles += 7;
                 break;
 
             // D
             case 0x16:
                 state.D = memory.get(state.PC);
                 state.PC += 1;
-                executedMachineCyles += 7;
+                executedMachineCycles += 7;
                 break;
 
             // H
             case 0x26:
                 state.H = memory.get(state.PC);
                 state.PC += 1;
-                executedMachineCyles += 7;
+                executedMachineCycles += 7;
                 break;
 
             // M
             case 0x36:
                 memory.set(state.getHL(), memory.get(state.PC));
                 state.PC += 1;
-                executedMachineCyles += 10;
+                executedMachineCycles += 10;
                 break;
 
             // C
             case 0x0E:
                 state.C = memory.get(state.PC);
                 state.PC += 1;
-                executedMachineCyles += 7;
+                executedMachineCycles += 7;
                 break;
 
             // E
             case 0x1E:
                 state.E = memory.get(state.PC);
                 state.PC += 1;
-                executedMachineCyles += 7;
+                executedMachineCycles += 7;
                 break;
 
             // L
             case 0x2E:
                 state.L = memory.get(state.PC);
                 state.PC += 1;
-                executedMachineCyles += 7;
+                executedMachineCycles += 7;
                 break;
 
             // A
             case 0x3E:
                 state.A = memory.get(state.PC);
                 state.PC += 1;
-                executedMachineCyles += 7;
+                executedMachineCycles += 7;
                 break;
 
             // RCL
@@ -320,7 +320,7 @@ namespace emulator
                 state.CY = (state.A & 0x80) >> 7;
                 state.A <<= 1;
                 state.A |= state.CY;
-                executedMachineCyles += 4;
+                executedMachineCycles += 4;
                 break;
 
             // RAL
@@ -330,7 +330,7 @@ namespace emulator
                 state.A <<= 1;
                 state.A |= state.CY;
                 state.CY = intermediate;
-                executedMachineCyles += 4;
+                executedMachineCycles += 4;
                 break;
 
             // DAA
@@ -351,14 +351,14 @@ namespace emulator
                 }
                 // Note: the carry bit is not reset in this case.
                 setZSPFlags(state.A);
-                executedMachineCyles += 4;
+                executedMachineCycles += 4;
                 break;
 
             // STC
             // Set carry to 1
             case 0x37:
                 state.CY = 1;
-                executedMachineCyles += 4;
+                executedMachineCycles += 4;
                 break;
 
             // DAD
@@ -372,7 +372,7 @@ namespace emulator
             // DE
             case 0x19:
                 executeDAD(state.getDE());
-                executedMachineCyles += 10;
+                executedMachineCycles += 10;
                 break;
 
             // HL
@@ -392,13 +392,13 @@ namespace emulator
             // BC
             case 0x0A:
                 state.A = memory.get(state.getBC());
-                executedMachineCyles += 7;
+                executedMachineCycles += 7;
                 break;
 
             // DE
             case 0x1A:
                 state.A = memory.get(state.getDE());
-                executedMachineCyles += 7;
+                executedMachineCycles += 7;
                 break;
 
             // LHLD
@@ -408,7 +408,7 @@ namespace emulator
                 address = memory.getWord(state.PC);
                 state.setHL(memory.getWord(address));
                 state.PC += 2;
-                executedMachineCyles += 16;
+                executedMachineCycles += 16;
                 break;
 
             // LDA
@@ -419,7 +419,7 @@ namespace emulator
                 address = memory.getWord(state.PC);
                 state.A = memory.get(address);
                 state.PC += 2;
-                executedMachineCyles += 13;
+                executedMachineCycles += 13;
                 break;
 
             // RRC
@@ -429,7 +429,7 @@ namespace emulator
                 state.CY = state.A & 0x01;
                 state.A >>= 1;
                 state.A |= (state.CY << 7);
-                executedMachineCyles += 4;
+                executedMachineCycles += 4;
                 break;
 
             // RAR
@@ -440,7 +440,7 @@ namespace emulator
                 state.A >>= 1;
                 state.A |= (state.CY << 7);
                 state.CY = intermediate;
-                executedMachineCyles += 4;
+                executedMachineCycles += 4;
                 break;
 
             // CMA
@@ -448,7 +448,7 @@ namespace emulator
 
             case 0x2F:
                 state.A = ~state.A;
-                executedMachineCyles += 4;
+                executedMachineCycles += 4;
                 break;
 
             // CMC
@@ -456,323 +456,323 @@ namespace emulator
 
             case 0x3F:
                 state.CY = !state.CY;
-                executedMachineCyles += 4;
+                executedMachineCycles += 4;
                 break;
 
             // MOV
             // Move register/memory to register/memory
 
             case 0x40: // B to B
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x50: // B to D
                 state.D = state.B;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x60: // B to H
                 state.H = state.B;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x70: // B to M
                 memory.set(state.getHL(), state.B);
-                executedMachineCyles += 7;
+                executedMachineCycles += 7;
                 break;
 
             case 0x41: // C to B
                 state.B = state.C;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x51: // C to D
                 state.D = state.C;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x61: // C to H
                 state.H = state.C;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x71: // C to M
                 memory.set(state.getHL(), state.C);
-                executedMachineCyles += 7;
+                executedMachineCycles += 7;
                 break;
 
             case 0x42: // D to B
                 state.B = state.D;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x52: // D to D
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x62: // D to H
                 state.H = state.D;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x72: // D to M
                 memory.set(state.getHL(), state.D);
-                executedMachineCyles += 7;
+                executedMachineCycles += 7;
                 break;
 
             case 0x43: // E to B
                 state.B = state.E;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x53: // E to D
                 state.D = state.E;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x63: // E to H
                 state.H = state.E;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x73: // E to M
                 memory.set(state.getHL(), state.E);
-                executedMachineCyles += 7;
+                executedMachineCycles += 7;
                 break;
 
             case 0x44: // H to B
                 state.B = state.H;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x54: // H to D
                 state.D = state.H;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x64: // H to H
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x74: // H to M
                 memory.set(state.getHL(), state.H);
-                executedMachineCyles += 7;
+                executedMachineCycles += 7;
                 break;
 
             case 0x45: // L to B
                 state.B = state.L;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x55: // L to D
                 state.D = state.L;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x65: // L to H
                 state.H = state.L;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x75: // L to M
                 memory.set(state.getHL(), state.L);
-                executedMachineCyles += 7;
+                executedMachineCycles += 7;
                 break;
 
             case 0x46: // M to B
                 state.B = memory.get(state.getHL());
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x56: // M to D
                 state.D = memory.get(state.getHL());
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x66: // M to H
                 state.H = memory.get(state.getHL());
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x76: // M to M
-                executedMachineCyles += 7;
+                executedMachineCycles += 7;
                 halt();
                 break;
 
             case 0x47: // A to B
                 state.B = state.A;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x57: // A to D
                 state.D = state.A;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x67: // A to H
                 state.H = state.A;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x77: // A to M
                 memory.set(state.getHL(), state.A);
-                executedMachineCyles += 7;
+                executedMachineCycles += 7;
                 break;
 
             case 0x48: // B to C
                 state.C = state.B;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x58: // B to E
                 state.E = state.B;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x68: // B to L
                 state.L = state.B;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x78: // B to A
                 state.A = state.B;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x49: // C to C
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x59: // C to E
                 state.E = state.C;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x69: // C to L
                 state.L = state.C;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x79: // C to A
                 state.A = state.C;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x4A: // D to C
                 state.C = state.D;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x5A: // D to E
                 state.E = state.D;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x6A: // D to L
                 state.L = state.D;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x7A: // D to A
                 state.A = state.D;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x4B: // E to C
                 state.C = state.E;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x5B: // E to E
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x6B: // E to L
                 state.L = state.E;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x7B: // E to A
                 state.A = state.E;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x4C: // H to C
                 state.C = state.H;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x5C: // H to E
                 state.E = state.H;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x6C: // H to L
                 state.L = state.H;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x7C: // H to A
                 state.A = state.H;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x4D: // L to C
                 state.C = state.L;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x5D: // L to E
                 state.E = state.L;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x6D: // L to L
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x7D: // L to A
                 state.A = state.L;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x4E: // M to C
                 state.C = memory.get(state.getHL());
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x5E: // M to E
                 state.E = memory.get(state.getHL());
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x6E: // M to L
                 state.L = memory.get(state.getHL());
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x7E: // M to A
                 state.A = memory.get(state.getHL());
-                executedMachineCyles += 7;
+                executedMachineCycles += 7;
                 break;
 
             case 0x4F: // A to C
                 state.C = state.A;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x5F: // A to E
                 state.E = state.A;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x6F: // A to L
                 state.L = state.A;
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             case 0x7F: // A to A
-                executedMachineCyles += 7;
+                executedMachineCycles += 7;
                 break;
 
             // ADD
@@ -804,7 +804,7 @@ namespace emulator
 
             case 0x86:
                 executeADD(memory.get(state.getHL()));
-                executedMachineCyles += 3;
+                executedMachineCycles += 3;
                 break;
 
             case 0x87:
@@ -840,7 +840,7 @@ namespace emulator
 
             case 0x96:
                 executeSUB(memory.get(state.getHL()));
-                executedMachineCyles += 3;
+                executedMachineCycles += 3;
                 break;
 
             case 0x97:
@@ -876,7 +876,7 @@ namespace emulator
 
             case 0xA6:
                 executeANA(memory.get(state.getHL()));
-                executedMachineCyles += 3;
+                executedMachineCycles += 3;
                 break;
 
             case 0xA7:
@@ -912,7 +912,7 @@ namespace emulator
 
             case 0xB6:
                 executeORA(memory.get(state.getHL()));
-                executedMachineCyles += 3;
+                executedMachineCycles += 3;
                 break;
 
             case 0xB7:
@@ -948,7 +948,7 @@ namespace emulator
 
             case 0x8E:
                 executeADD(memory.get(state.getHL()), state.CY);
-                executedMachineCyles += 3;
+                executedMachineCycles += 3;
                 break;
 
             case 0x8F:
@@ -984,7 +984,7 @@ namespace emulator
 
             case 0x9E:
                 executeSUB(memory.get(state.getHL()), state.CY);
-                executedMachineCyles += 3;
+                executedMachineCycles += 3;
                 break;
 
             case 0x9F:
@@ -1020,7 +1020,7 @@ namespace emulator
 
             case 0xAE:
                 executeXRA(memory.get(state.getHL()));
-                executedMachineCyles += 3;
+                executedMachineCycles += 3;
                 break;
 
             case 0xAF:
@@ -1056,7 +1056,7 @@ namespace emulator
 
             case 0xBE:
                 executeCMP(memory.get(state.getHL()));
-                executedMachineCyles += 3;
+                executedMachineCycles += 3;
                 break;
 
             case 0xBF:
@@ -1118,21 +1118,21 @@ namespace emulator
             case 0xC1:
                 state.setBC(memory.getWord(state.SP));
                 state.SP += 2;
-                executedMachineCyles += 10;
+                executedMachineCycles += 10;
                 break;
 
             // DE
             case 0xD1:
                 state.setDE(memory.getWord(state.SP));
                 state.SP += 2;
-                executedMachineCyles += 10;
+                executedMachineCycles += 10;
                 break;
 
             // HL
             case 0xE1:
                 state.setHL(memory.getWord(state.SP));
                 state.SP += 2;
-                executedMachineCyles += 10;
+                executedMachineCycles += 10;
                 break;
 
             // POP PSW
@@ -1141,7 +1141,7 @@ namespace emulator
                 state.unpackFlags(memory.get(state.SP));
                 state.A = memory.get(state.SP + 1);
                 state.SP += 2;
-                executedMachineCyles += 10;
+                executedMachineCycles += 10;
                 break;
 
             // JNZ
@@ -1208,7 +1208,7 @@ namespace emulator
             case 0xD3:
                 io.set(memory.get(state.PC), state.A);
                 state.PC += 1;
-                executedMachineCyles += 10;
+                executedMachineCycles += 10;
                 break;
 
             // XTHL
@@ -1216,14 +1216,14 @@ namespace emulator
             case 0xE3:
                 std::swap(state.L, memory[state.SP]);
                 std::swap(state.H, memory[state.SP + 1]);
-                executedMachineCyles += 18;
+                executedMachineCycles += 18;
                 break;
 
             // DI
             // Disable interrupts
             case 0xF3:
                 setEnableInterrupts(false);
-                executedMachineCyles += 4;
+                executedMachineCycles += 4;
                 break;
 
             // CNZ
@@ -1281,21 +1281,21 @@ namespace emulator
             case 0xC5:
                 memory.setWord(state.SP - 2, state.getBC());
                 state.SP -= 2;
-                executedMachineCyles += 11;
+                executedMachineCycles += 11;
                 break;
 
             // DE
             case 0xD5:
                 memory.setWord(state.SP - 2, state.getDE());
                 state.SP -= 2;
-                executedMachineCyles += 11;
+                executedMachineCycles += 11;
                 break;
 
             // HL
             case 0xE5:
                 memory.setWord(state.SP - 2, state.getHL());
                 state.SP -= 2;
-                executedMachineCyles += 11;
+                executedMachineCycles += 11;
                 break;
 
             // PUSH PSW
@@ -1304,7 +1304,7 @@ namespace emulator
                 memory.set(state.SP - 1, state.A);
                 memory.set(state.SP - 2, state.packFlags());
                 state.SP -= 2;
-                executedMachineCyles += 11;
+                executedMachineCycles += 11;
                 break;
 
             // ADI
@@ -1312,7 +1312,7 @@ namespace emulator
             case 0xC6:
                 executeADD(memory.get(state.PC));
                 ++state.PC;
-                executedMachineCyles += 3;
+                executedMachineCycles += 3;
                 break;
 
             // SUI
@@ -1320,7 +1320,7 @@ namespace emulator
             case 0xD6:
                 executeSUB(memory.get(state.PC));
                 ++state.PC;
-                executedMachineCyles += 3;
+                executedMachineCycles += 3;
                 break;
 
             // ANI
@@ -1328,7 +1328,7 @@ namespace emulator
             case 0xE6:
                 executeANA(memory.get(state.PC));
                 ++state.PC;
-                executedMachineCyles += 3;
+                executedMachineCycles += 3;
                 break;
 
             // ORI
@@ -1336,7 +1336,7 @@ namespace emulator
             case 0xF6:
                 executeORA(memory.get(state.PC));
                 ++state.PC;
-                executedMachineCyles += 3;
+                executedMachineCycles += 3;
                 break;
 
             // RST (Restart)
@@ -1365,14 +1365,14 @@ namespace emulator
             // Jump to address specified by HL register
             case 0xE9:
                 state.PC = state.getHL();
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             // SPHL
             // Contents of HL register is moved in SP
             case 0xF9:
                 state.SP = state.getHL();
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             // IN
@@ -1380,7 +1380,7 @@ namespace emulator
             case 0xDB:
                 state.A = io.get(memory.get(state.PC));
                 state.PC += 1;
-                executedMachineCyles += 10;
+                executedMachineCycles += 10;
                 break;
 
             // XCHG
@@ -1388,14 +1388,14 @@ namespace emulator
             case 0xEB:
                 std::swap(state.H, state.D);
                 std::swap(state.L, state.E);
-                executedMachineCyles += 5;
+                executedMachineCycles += 5;
                 break;
 
             // EI 
             // Enable interrupts
             case 0xFB:
                 setEnableInterrupts(true);
-                executedMachineCyles += 4;
+                executedMachineCycles += 4;
                 break;
 
             case 0xCD:
@@ -1414,7 +1414,7 @@ namespace emulator
             case 0xCE:
                 executeADD(memory.get(state.PC), state.CY);
                 ++state.PC;
-                executedMachineCyles += 3;
+                executedMachineCycles += 3;
                 break;
 
             // SBI
@@ -1422,7 +1422,7 @@ namespace emulator
             case 0xDE:
                 executeSUB(memory.get(state.PC), state.CY);
                 ++state.PC;
-                executedMachineCyles += 3;
+                executedMachineCycles += 3;
                 break;
 
             // XRI
@@ -1430,7 +1430,7 @@ namespace emulator
             case 0xEE:
                 executeXRA(memory.get(state.PC));
                 ++state.PC;
-                executedMachineCyles += 3;
+                executedMachineCycles += 3;
                 break;
 
             // CPI
@@ -1438,7 +1438,7 @@ namespace emulator
             case 0xFE:
                 executeCMP(memory.get(state.PC));
                 ++state.PC;
-                executedMachineCyles += 3;
+                executedMachineCycles += 3;
                 break;
 
             #if EMULATOR_CHECK_INVALID_OPCODES
@@ -1449,7 +1449,7 @@ namespace emulator
 
         ++executedInstructionCycles;
 
-        return executedMachineCyles - previousExecutedMachineCycles;
+        return executedMachineCycles - previousExecutedMachineCycles;
     }
 
     std::size_t Cpu::issueRSTInterrupt(byte address)
@@ -1481,7 +1481,7 @@ namespace emulator
         ++reg;
         setZSPFlags(reg);
 
-        executedMachineCyles += 5;
+        executedMachineCycles += 5;
     }
 
     void Cpu::executeDCR(byte& reg)
@@ -1490,7 +1490,7 @@ namespace emulator
         --reg;
         setZSPFlags(reg);
 
-        executedMachineCyles += 5;
+        executedMachineCycles += 5;
     }
 
     void Cpu::executeDAD(word value)
@@ -1498,7 +1498,7 @@ namespace emulator
         state.CY = value > (0xFFFF - state.getHL());
         state.setHL(state.getHL() + value);
 
-        executedMachineCyles += 10;
+        executedMachineCycles += 10;
     }
 
     void Cpu::executeADD(byte value, byte carry)
@@ -1509,7 +1509,7 @@ namespace emulator
         state.A += value + carry;
         setZSPFlags(state.A);
 
-        executedMachineCyles += 4;
+        executedMachineCycles += 4;
     }
 
     void Cpu::executeSUB(byte value, byte carry)
@@ -1525,7 +1525,7 @@ namespace emulator
         state.A -= value;
         setZSPFlags(state.A);
 
-        executedMachineCyles += 4;
+        executedMachineCycles += 4;
     }
 
     void Cpu::executeANA(byte value)
@@ -1535,7 +1535,7 @@ namespace emulator
         state.A &= value;
         setZSPFlags(state.A);
 
-        executedMachineCyles += 4;
+        executedMachineCycles += 4;
     }
 
     void Cpu::executeORA(byte value)
@@ -1544,7 +1544,7 @@ namespace emulator
         state.A |= value;
         setZSPFlags(state.A);
 
-        executedMachineCyles += 4;
+        executedMachineCycles += 4;
     }
 
     void Cpu::executeXRA(byte value)
@@ -1553,7 +1553,7 @@ namespace emulator
         state.CY = state.CA = 0;
         setZSPFlags(state.A);
 
-        executedMachineCyles += 4;
+        executedMachineCycles += 4;
     }
 
     void Cpu::executeCMP(byte value)
@@ -1567,7 +1567,7 @@ namespace emulator
 
         setZSPFlags(state.A - value);
 
-        executedMachineCyles += 4;
+        executedMachineCycles += 4;
     }
 
     void Cpu::executeRET()
@@ -1575,7 +1575,7 @@ namespace emulator
         state.PC = memory.getWord(state.SP);
         state.SP += 2;
 
-        executedMachineCyles += 10;
+        executedMachineCycles += 10;
     }
 
     void Cpu::executeConditionalRET(bool condition)
@@ -1583,10 +1583,10 @@ namespace emulator
         if (condition)
         {
             executeRET();
-            executedMachineCyles += 1;
+            executedMachineCycles += 1;
         }
         else
-            executedMachineCyles += 5;
+            executedMachineCycles += 5;
     }
 
     void Cpu::executeConditionalJMP(bool condition)
@@ -1596,7 +1596,7 @@ namespace emulator
         else
             state.PC += 2;
 
-        executedMachineCyles += 10;
+        executedMachineCycles += 10;
     }
 
     void Cpu::executeConditionalCALL(bool condition)
@@ -1607,12 +1607,12 @@ namespace emulator
             state.SP -= 2;
             state.PC = memory.getWord(state.PC);
 
-            executedMachineCyles += 17;
+            executedMachineCycles += 17;
         }
         else
         {
             state.PC += 2;
-            executedMachineCyles += 11;
+            executedMachineCycles += 11;
         }            
     }
 
@@ -1621,7 +1621,7 @@ namespace emulator
         memory.setWord(state.SP - 2, state.PC);
         state.SP -= 2;
         state.PC = address;
-        executedMachineCyles += 11;
+        executedMachineCycles += 11;
     }
 
     void Cpu::setEnableInterrupts(bool enabled)

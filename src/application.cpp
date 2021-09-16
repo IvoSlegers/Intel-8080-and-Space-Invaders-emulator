@@ -6,7 +6,7 @@ namespace emulator
 {
     Application::Application(): memory(0x2000, 0x2000), io(), cpu(memory, io),
         window(sf::VideoMode(800, 600), "intel 8080 - Space Invaders"), console(),
-        consoleUI(console, cpu, memory), video(window, memory)
+        consoleUI(*this, console), video(window, memory)
     {}
 
     void Application::run()
@@ -15,7 +15,8 @@ namespace emulator
 
         window.setFramerateLimit(60);
 
-        //consoleUI.draw();
+        consoleUI.initialise();
+        consoleUI.draw();
         
         sf::Clock frametimeClock;
         while (window.isOpen())
@@ -31,34 +32,51 @@ namespace emulator
         }
     }
 
+    void Application::reset()
+    {
+        cpu.reset();
+        consoleUI.draw();
+    }
+
+    void Application::quit()
+    {
+        window.close();
+    }
+
+    void Application::executeSingleStep()
+    {
+        cpu.executeInstructionCycle();
+        consoleUI.draw();
+    }
+
+    void Application::toggleBreakpoint(word address)
+    {
+        std::set<word>::iterator i = breakpoints.find(address);
+
+        if (i == breakpoints.end())
+            breakpoints.insert(address);
+        else
+            breakpoints.erase(i);
+    }
+
     void Application::onConsoleKeyEvent(const KEY_EVENT_RECORD& event)
     {
-        if (event.uChar.AsciiChar == 'q')
-            window.close();
-
-        if (event.uChar.AsciiChar == 'r')
-            cpu.reset();
-
-        if (event.uChar.AsciiChar == 's' && event.bKeyDown)
-        {
-            cpu.executeInstructionCycle();
-            consoleUI.draw();
-        }
+        consoleUI.onConsoleKeyEvent(event);
     }
 
     void Application::onEvent(const sf::Event& event)
     {
-        if (event.type == sf::Event::Closed)
-            window.close();
+        // if (event.type == sf::Event::Closed)
+        //     window.close();
 
-        if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Q)
-            window.close();
+        // if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Q)
+        //     window.close();
 
-        if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::S)
-        {
-            cpu.executeInstructionCycle();
-            consoleUI.draw();
-        }
+        // if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::S)
+        // {
+        //     cpu.executeInstructionCycle();
+        //     consoleUI.draw();
+        // }
     }
 
     void Application::handleEvents()
@@ -100,7 +118,7 @@ namespace emulator
         //     upperHalf = !upperHalf;
         // }
 
-        if (running)
+        if (false)
         {
             machineCyclesToBeExecuted = 2'000'000/120;
             while (machineCyclesToBeExecuted > 0 && running)
@@ -110,8 +128,7 @@ namespace emulator
                 {
                     triggerBreakpoint();
                     return;
-                }
-                    
+                }                    
             }
 
             video.update(0, 0, SpaceInvadersVideo::crtWidth, SpaceInvadersVideo::crtHeight/2,

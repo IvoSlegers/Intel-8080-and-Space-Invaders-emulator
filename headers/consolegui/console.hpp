@@ -1,6 +1,8 @@
 #pragma once
 
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+
 #include <string>
 #include <functional>
 
@@ -64,8 +66,6 @@ namespace emulator
             Size getBufferSize() const;
 
             void setTextColor(const Color foreground = Color::White, const Color background = Color::Black);
-
-            void setEchoInput(bool enabled);
 
             bool pollEvent(KEY_EVENT_RECORD& event);
 

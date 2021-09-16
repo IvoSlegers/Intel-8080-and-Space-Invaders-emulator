@@ -22,9 +22,6 @@ namespace emulator
 
         DWORD newMode = previousOutputMode & (~ENABLE_WRAP_AT_EOL_OUTPUT);
         SetConsoleMode(outputHandle, newMode);
-
-        newMode = previousInputMode & ~ENABLE_ECHO_INPUT;
-        SetConsoleMode(inputHandle, newMode);
     }
 
     Console::Console(Console&& other): inputHandle(other.inputHandle), outputHandle(other.outputHandle),
@@ -158,23 +155,6 @@ namespace emulator
         {
             throw ConsoleException("Could not set text attributes in Console::setColors.");
         }
-    }
-
-    void Console::setEchoInput(bool enabled)
-    {
-        DWORD mode;
-        GetConsoleMode(inputHandle, &mode);
-
-        if (enabled)
-        {
-            mode |= ENABLE_ECHO_INPUT;
-        }
-        else
-        {
-            mode &= ~ENABLE_ECHO_INPUT;
-        }
-
-        SetConsoleMode(inputHandle, mode);
     }
 
     bool Console::pollEvent(KEY_EVENT_RECORD& event)
