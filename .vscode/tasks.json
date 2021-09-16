@@ -22,8 +22,6 @@ i.e. (for sfml):
 "-lsfml-system-d",
 "-lsfml-window-d",
 "-lopengl32",
-
-mingw32-make -j 8
 */
 
 {
@@ -90,6 +88,24 @@ mingw32-make -j 8
 			],
 			"group": "build",
 			"detail": "compiler: \"C:\\Program Files\\mingw-w64\\x86_64-8.1.0-win32-seh-rt_v6-rev0\\mingw64\\bin\\g++.exe\""
-		}
+		},
+
+		{
+			"type": "cppbuild",
+			"label": "Quick build (Debug)",
+			"command": "mingw32-make",
+			"args": [
+				"debug",
+				"-j"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build",
+			"detail": "compiler: g++.exe"
+		},
 	]
 }

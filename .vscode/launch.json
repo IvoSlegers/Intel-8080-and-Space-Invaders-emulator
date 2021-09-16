@@ -28,7 +28,7 @@
         },
 
         {
-            "name": "g++.exe - Launch project, no build (Debug)",
+            "name": "Quick build (debug) and launch",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}\\application_debug.exe",
@@ -46,8 +46,9 @@
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
                 }
-            ]
-        }
+            ],
+            "preLaunchTask": "Quick build (Debug)"
+        },
 
         {
             "name": "g++.exe - Build and launch project (Release)",

@@ -1,8 +1,6 @@
 #include "consolegui/console.hpp"
 #include "consolegui/console_exception.hpp"
 
-#include <iostream>
-
 namespace emulator
 {
     Console::Console()
