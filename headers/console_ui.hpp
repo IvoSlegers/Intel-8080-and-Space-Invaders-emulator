@@ -1,6 +1,7 @@
 #pragma once
 
 #include "int_types.hpp"
+#include "consolegui/console.hpp"
 
 #include <vector>
 #include <string>
@@ -12,7 +13,6 @@
 namespace emulator
 {
     class Application;
-    class Console;
     class Memory;
     struct Cpu;
 
@@ -75,7 +75,7 @@ namespace emulator
             void initialise();
             void draw();
 
-            void onConsoleKeyEvent(const KEY_EVENT_RECORD& event);
+            void onConsoleKeyEvent(const Console::Event& event);
 
         private: 
             void drawCpuState();

@@ -288,59 +288,17 @@ namespace emulator
         console.setCursorPosition(0, console.getScreenSize().height);
     }
 
-    void ConsoleUI::onConsoleKeyEvent(const KEY_EVENT_RECORD& event)
+    void ConsoleUI::onConsoleKeyEvent(const Console::Event& event)
     {
-        if (isInDialogMode)
+        if (event.isDirectInput)
         {
-            if (event.bKeyDown)
-            {
-                if (event.wVirtualKeyCode == VK_RETURN)
-                {
-                    endDialog();
+            const KEY_EVENT_RECORD& keyEvent = event.keyEvent;
 
-                    std::string input = dialogInput.str();
-                    std::transform(input.begin(), input.end(), input.begin(),
-                        [] (const char c)
-                        {
-                            return std::tolower(c);
-                        });
+            if (!keyEvent.bKeyDown)
+                return;
 
-                    std::string::size_type index = input.find("breakpoint");
-                    if (index != std::string::npos)
-                    { 
-                        int address = -1;
-                        try
-                        {
-                            address = std::stoi(input.substr(index + 11, 4), nullptr, 16);
-                        }
-                        catch (const std::invalid_argument& exception)
-                        {
-                            return;
-                        };         
-                        
-                        if (address < 0 || static_cast<unsigned int>(address) >= memory.getTotalSize())
-                        {
-                            showMessage("Given address invalid.");
-                        }
-                        else
-                        {
-                            application.toggleBreakpoint(address);
-                            draw();
-                        }
-                    }
-                }
-                else
-                {
-                    char input = event.uChar.AsciiChar;
-                    dialogInput << input;
-                    console.write(std::string(1, input));
-                }                    
-            }            
-        }
-        else if (event.bKeyDown)
-        {
             InstructionsDisplay::Instruction instruction;
-            switch (event.wVirtualKeyCode)
+            switch (keyEvent.wVirtualKeyCode)
             {
                 case 'Q':
                     application.quit();
@@ -420,6 +378,19 @@ namespace emulator
                     draw();
                     break;
             }
+
+            console.setCursorPosition(54, 2);
+            console.write("direct");
+        }
+        else
+        {
+            const std::string& line = event.line;
+            showMessage(line);
+
+            console.setCursorPosition(54, 2);
+            console.write("line");
+
+            endDialog();
         }
     }
 
@@ -534,12 +505,16 @@ namespace emulator
         dialogPrompt = prompt;
 
         draw();
+
+        console.setDirectInputMode(false);
     }
 
     void ConsoleUI::endDialog()
     {
         isInDialogMode = false;
         draw();
+
+        console.setDirectInputMode(true);
     }
 
     void ConsoleUI::drawDialog()

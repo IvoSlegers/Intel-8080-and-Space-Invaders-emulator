@@ -20,6 +20,8 @@ namespace emulator
 
         DWORD newMode = previousOutputMode & (~ENABLE_WRAP_AT_EOL_OUTPUT);
         SetConsoleMode(outputHandle, newMode);
+
+        setDirectInputMode(true);
     }
 
     Console::Console(Console&& other): inputHandle(other.inputHandle), outputHandle(other.outputHandle),
@@ -155,7 +157,22 @@ namespace emulator
         }
     }
 
-    bool Console::pollEvent(KEY_EVENT_RECORD& event)
+    void Console::setDirectInputMode(bool enabled)
+    {
+        isInDirectInputMode_ = enabled;
+
+        DWORD mode;
+        GetConsoleMode(inputHandle, &mode);
+
+        if (enabled)
+            mode &= (~ENABLE_ECHO_INPUT) & (~ENABLE_LINE_INPUT);
+        else
+            mode |= ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT;            
+
+        SetConsoleMode(inputHandle, mode);
+    }
+
+    bool Console::pollEvent(Event& event)
     {
         DWORD numberOfEvents;
         if (!GetNumberOfConsoleInputEvents(inputHandle, &numberOfEvents))
@@ -164,16 +181,29 @@ namespace emulator
         if (numberOfEvents == 0)
             return false;
 
-        INPUT_RECORD record;
-        DWORD numberOfEventsRead;
-        if (!ReadConsoleInput(inputHandle, &record, 1, &numberOfEventsRead))
-            return false;
+        event.isDirectInput = isInDirectInputMode_;
+        if (isInDirectInputMode_)
+        {
+            INPUT_RECORD record;
+            DWORD numberOfEventsRead;
+            if (!ReadConsoleInput(inputHandle, &record, 1, &numberOfEventsRead))
+                return false;
 
-        if (record.EventType != KEY_EVENT)
-            return false;
+            if (record.EventType != KEY_EVENT)
+                return false;
 
-        event = record.Event.KeyEvent;
+            event.keyEvent = record.Event.KeyEvent;
+            return true;
+        }
+        else
+        {
+            char buffer[128];
+            DWORD numberOfCharacters;
+            if (!ReadConsoleA(inputHandle, buffer, 128, &numberOfCharacters, nullptr))
+                return false;
 
-        return true;
+            event.line = std::string(buffer, numberOfCharacters);
+            return true;
+        }
     }
 } // namespace emulator

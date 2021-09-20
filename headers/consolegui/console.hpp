@@ -44,6 +44,15 @@ namespace emulator
     class Console
     {
         public:
+            struct Event
+            {
+                bool isDirectInput;
+
+                KEY_EVENT_RECORD keyEvent;
+                std::string line;              
+            };
+
+        public:
             explicit Console();
             Console(const Console&) = delete;
             Console(Console&&);
@@ -67,10 +76,15 @@ namespace emulator
 
             void setTextColor(const Color foreground = Color::White, const Color background = Color::Black);
 
-            bool pollEvent(KEY_EVENT_RECORD& event);
+            void setDirectInputMode(bool enabled);
+            bool isInDirectInputMode() const { return isInDirectInputMode_; }
+
+            bool pollEvent(Event& event);
 
         private:
             HANDLE inputHandle, outputHandle;
             DWORD previousInputMode, previousOutputMode;   
+
+            bool isInDirectInputMode_ = true;
     };
 }

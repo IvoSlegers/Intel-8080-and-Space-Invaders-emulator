@@ -61,7 +61,7 @@ namespace emulator
             breakpoints.erase(i);           
     }
 
-    void Application::onConsoleKeyEvent(const KEY_EVENT_RECORD& event)
+    void Application::onConsoleKeyEvent(const Console::Event& event)
     {
         consoleUI.onConsoleKeyEvent(event);
     }
@@ -87,7 +87,7 @@ namespace emulator
         while (window.pollEvent(event))
             onEvent(event);
 
-        KEY_EVENT_RECORD consoleEvent;
+        Console::Event consoleEvent;
         while (console.pollEvent(consoleEvent))
             onConsoleKeyEvent(consoleEvent);
     }
