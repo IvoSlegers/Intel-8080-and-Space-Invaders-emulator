@@ -15,8 +15,9 @@
 // - Wrap all Space Invaders specific stuff into a SpaceInvadersCabinet class.
 // - Implement breakpoints system
 // Possible interesting breakpoint 2778
-// - Implement draw dialog prompt in draw function of consoleUI.
 // - Using a set for breakpoints is potentially slow, replace by large bool array?
+// - Implement a follow state.PC mode
+// - re-examine the consoleui dialog stuff, at the moment backspace doesn't work
 
 #if EMULATOR_LOG_SFML_ERRORS
     #include <SFML/System.hpp>

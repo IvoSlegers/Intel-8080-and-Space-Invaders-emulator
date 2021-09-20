@@ -1,5 +1,6 @@
 #include "console_ui.hpp"
 
+#include "defines.hpp"
 #include "application.hpp"
 #include "cpu.hpp"
 #include "memory.hpp"
@@ -86,13 +87,89 @@ namespace emulator
         }
     } 
 
-    void InstructionsDisplay::moveTo(word address)
+    void InstructionsDisplay::moveTo(word address, bool addToHistory)
     {
         displayedInstructionsCache.clear();
         addInstructionsToCache(address, numberOfInstructionsDisplayed);
 
         firstDisplayedInstructionIndex = 0;
         selectedInstructionIndex = 0;
+
+        if (addToHistory)
+            jumpHistory.push_back(address);
+    }
+
+    bool InstructionsDisplay::moveToTarget(const Instruction& instruction)
+    {
+        byte opCode = instruction.opCode;
+
+        static const std::set<byte> controlFlowOpCodes = 
+            {
+                0xC2, 0xD2, 0xE2, 0xF2,
+                0xC3,
+                0xC4, 0xD4, 0xE4, 0xF4,
+                0xCA, 0xDA, 0xEA, 0xFA,
+                0xCC, 0xDC, 0xEC, 0xFC,
+                0xCD,
+
+                #if !EMULATOR_CHECK_INVALID_OPCODES
+                    0xCB,
+                    0xDD, 0xED, 0xFD
+                #endif
+            };
+
+        // (Conditional) Call and Jump instructions
+        if (controlFlowOpCodes.count(opCode) != 0)
+        {
+            moveTo(memory.getWord(instruction.address + 1));
+            return true;
+        }
+
+        // RST instructions.
+        // The opcode for RST looks like 11NNN111
+        if ((opCode & 0b11000111) == 0b11000111)
+        {
+            moveTo(opCode && 0b001111000);
+            return true;
+        }
+
+        return false;
+    }
+
+    void InstructionsDisplay::moveBack()
+    {
+        word address = 0;
+        if (!jumpHistory.empty())
+        {
+            address = jumpHistory.back();
+            jumpHistory.pop_back();
+        }
+
+        moveTo(address, false);
+    }
+
+    void InstructionsDisplay::assureInstructionIsDisplayed(word address)
+    {
+        int firstAddress = displayedInstructionsCache.front().address;
+        int lastAddress = displayedInstructionsCache.back().address;
+
+        if (address < firstAddress - 6 || address > lastAddress + 6)
+        {
+            moveTo(address);
+            return;
+        }
+
+        if (address <= firstAddress + 6)
+        {
+            scrollUp(3);
+            return;
+        }
+
+        if (address >= lastAddress - 6)
+        {
+            scrollDown(3);
+            return;
+        }
     }
 
     void InstructionsDisplay::moveSelectionUp()
@@ -121,26 +198,27 @@ namespace emulator
         }
     }
 
-    void InstructionsDisplay::scrollUp()
+    void InstructionsDisplay::scrollUp(unsigned short lines)
     {
-        if (firstDisplayedInstructionIndex > 0)
-            firstDisplayedInstructionIndex--;
+        firstDisplayedInstructionIndex = std::max(
+            0, static_cast<int>(firstDisplayedInstructionIndex) - lines);
     }
 
-    void InstructionsDisplay::scrollDown()
+    void InstructionsDisplay::scrollDown(unsigned short lines)
     {
-        if (firstDisplayedInstructionIndex + numberOfInstructionsDisplayed + 1 >= displayedInstructionsCache.size())
+        if (firstDisplayedInstructionIndex + numberOfInstructionsDisplayed + lines >= displayedInstructionsCache.size())
         {
-            growCache(1);
+            growCache(lines);
         }
 
-        if (firstDisplayedInstructionIndex < displayedInstructionsCache.size())
-            firstDisplayedInstructionIndex++;
+        firstDisplayedInstructionIndex = std::min<unsigned int>(
+            displayedInstructionsCache.size() - 1,
+            firstDisplayedInstructionIndex + lines);
     }
 
     bool InstructionsDisplay::getSelectedInstruction(Instruction& instruction)
     {
-        if (selectedInstructionIndex >= 0 && selectedInstructionIndex < displayedInstructionsCache.size())
+        if (selectedInstructionIndex >= displayedInstructionsCache.size())
             return false;
 
         instruction = displayedInstructionsCache[selectedInstructionIndex];
@@ -196,7 +274,7 @@ namespace emulator
 
     void ConsoleUI::initialise()
     {
-        instructionsDisplay.moveTo(0);
+        instructionsDisplay.moveTo(0, false);
     }
 
     void ConsoleUI::draw()
@@ -219,6 +297,37 @@ namespace emulator
                 if (event.wVirtualKeyCode == VK_RETURN)
                 {
                     endDialog();
+
+                    std::string input = dialogInput.str();
+                    std::transform(input.begin(), input.end(), input.begin(),
+                        [] (const char c)
+                        {
+                            return std::tolower(c);
+                        });
+
+                    std::string::size_type index = input.find("breakpoint");
+                    if (index != std::string::npos)
+                    { 
+                        int address = -1;
+                        try
+                        {
+                            address = std::stoi(input.substr(index + 11, 4), nullptr, 16);
+                        }
+                        catch (const std::invalid_argument& exception)
+                        {
+                            return;
+                        };         
+                        
+                        if (address < 0 || static_cast<unsigned int>(address) >= memory.getTotalSize())
+                        {
+                            showMessage("Given address invalid.");
+                        }
+                        else
+                        {
+                            application.toggleBreakpoint(address);
+                            draw();
+                        }
+                    }
                 }
                 else
                 {
@@ -239,10 +348,24 @@ namespace emulator
 
                 case 'R':
                     application.reset();
+
+                    if (isInFollowMode)
+                    {
+                        instructionsDisplay.assureInstructionIsDisplayed(cpu.getState().PC);
+                    }
+
+                    draw();
                     break;
 
                 case VK_SPACE:
                     application.executeSingleStep();
+
+                    if (isInFollowMode)
+                    {
+                        instructionsDisplay.assureInstructionIsDisplayed(cpu.getState().PC);
+                    }
+
+                    draw();
                     break;
 
                 case 'C':
@@ -254,26 +377,49 @@ namespace emulator
                     {
                         application.toggleBreakpoint(instruction.address);
                     }
+                    draw();
+                    break;
+
+                case 'F':
+                    isInFollowMode = !isInFollowMode;
+                    draw();
                     break;
 
                 case VK_UP:
                     instructionsDisplay.moveSelectionUp();
+                    draw();
                     break;
 
                 case VK_DOWN:
                     instructionsDisplay.moveSelectionDown();
+                    draw();
+                    break;
+
+                case VK_RIGHT:
+                    if (instructionsDisplay.getSelectedInstruction(instruction))
+                    {
+                        if (!instructionsDisplay.moveToTarget(instruction))
+                            showMessage("Invalid instruction selected.");
+                        else
+                            draw();
+                    }
+                    break;
+
+                case VK_LEFT:
+                        instructionsDisplay.moveBack();
+                        draw();
                     break;
 
                 case VK_PRIOR: //Page Up
                     instructionsDisplay.scrollUp();
+                    draw();
                     break;
 
                 case VK_NEXT: //Page Down
                     instructionsDisplay.scrollDown();
+                    draw();
                     break;
             }
-
-            draw();
         }
     }
 
@@ -371,6 +517,12 @@ namespace emulator
 
         console.setCursorPosition(54, y++);
         console.write("b: Toggle breakpoint");
+
+        console.setCursorPosition(54, y++);
+        if (isInFollowMode)
+            console.write("f: Disable follow mode");
+        else
+            console.write("f: Enable follow mode");
     }
 
     void ConsoleUI::beginDialog(const std::string& prompt)
@@ -402,4 +554,13 @@ namespace emulator
             console.setCursorPosition(0, height);
         }
     }
+
+    void ConsoleUI::showMessage(const std::string& message)
+    {
+        draw();
+
+        console.setCursorPosition(0, console.getScreenSize().height);
+        console.write(message);
+    }
+
 } // namespace emulator

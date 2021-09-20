@@ -30,13 +30,17 @@ namespace emulator
 
             void draw(short x, short y);
 
-            void moveTo(word address);
+            void moveTo(word address, bool addToHistory = true);
+            bool moveToTarget(const Instruction& instruction);
+            void moveBack();
+
+            void assureInstructionIsDisplayed(word address);
 
             void moveSelectionUp();
             void moveSelectionDown();
 
-            void scrollUp();
-            void scrollDown();
+            void scrollUp(unsigned short lines = 1);
+            void scrollDown(unsigned short lines = 1);
 
             bool getSelectedInstruction(Instruction& instruction);
 
@@ -59,6 +63,8 @@ namespace emulator
             std::vector<Instruction> displayedInstructionsCache;
             unsigned int firstDisplayedInstructionIndex = 0;
             unsigned int selectedInstructionIndex = 0;
+
+            std::vector<word> jumpHistory;
     };
 
     class ConsoleUI
@@ -84,6 +90,8 @@ namespace emulator
             void endDialog();
             void drawDialog();
 
+            void showMessage(const std::string& message);
+
             Application& application;
             Console& console;
 
@@ -96,6 +104,6 @@ namespace emulator
             std::string dialogPrompt;
             std::stringstream dialogInput;
 
-
+            bool isInFollowMode = true;
     };
 } // namespace emulator

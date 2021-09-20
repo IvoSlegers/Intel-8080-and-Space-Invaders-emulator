@@ -2,6 +2,8 @@
 
 #include "to_hex_string.hpp"
 
+#include <iostream>
+
 namespace emulator
 {
     Application::Application(): memory(0x2000, 0x2000), io(), cpu(memory, io),
@@ -54,9 +56,9 @@ namespace emulator
         std::set<word>::iterator i = breakpoints.find(address);
 
         if (i == breakpoints.end())
-            breakpoints.insert(address);
+            breakpoints.insert(address);           
         else
-            breakpoints.erase(i);
+            breakpoints.erase(i);           
     }
 
     void Application::onConsoleKeyEvent(const KEY_EVENT_RECORD& event)
