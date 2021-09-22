@@ -9,21 +9,15 @@ namespace emulator
     SpaceInvadersApplication::SpaceInvadersApplication(): memory(0x2000, 0x2000), io(), cpu(memory, io),
         window(sf::VideoMode(800, 600), "intel 8080 - Space Invaders"), console(),
         consoleUI(console, cpu, memory), video(window, memory)
-    {
-        ConsoleUI::QuitCallback callback = [this] ()
-        {
-            window.close();
-        };
-        consoleUI.setQuitCallback(callback);
-    }
+    {}
 
     void SpaceInvadersApplication::run()
     {
         memory.loadMemoryFromFile("invaders.rom");
+        consoleUI.signalMemoryChanged();
 
         window.setFramerateLimit(60);
 
-        consoleUI.initialise();
         consoleUI.draw();
         
         sf::Clock frametimeClock;
@@ -62,15 +56,21 @@ namespace emulator
          
     }
 
-    void SpaceInvadersApplication::onConsoleKeyEvent(const Console::Event& event)
+    void SpaceInvadersApplication::onConsoleEvent(const Console::Event& event)
     {
-        consoleUI.onConsoleKeyEvent(event);
+        if (event.isDirectInput && event.keyEvent.wVirtualKeyCode == VK_ESCAPE)
+            window.close();
+
+        consoleUI.onConsoleEvent(event);
     }
 
     void SpaceInvadersApplication::onEvent(const sf::Event& event)
     {
-        // if (event.type == sf::Event::Closed)
-        //     window.close();
+        if (event.type == sf::Event::Closed)
+             window.close();
+
+        if (event.type == sf::Event::KeyPressed || event.key.code == sf::Keyboard::Escape)
+            window.close();
 
         // if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Q)
         //     window.close();
@@ -90,7 +90,7 @@ namespace emulator
 
         Console::Event consoleEvent;
         while (console.pollEvent(consoleEvent))
-            onConsoleKeyEvent(consoleEvent);
+            onConsoleEvent(consoleEvent);
     }
 
     void SpaceInvadersApplication::update(float delta)

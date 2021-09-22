@@ -4,21 +4,22 @@
 
 #include "consolegui/console.hpp"
 #include "memory.hpp"
-#include "cpu.hpp"
+#include "diagnostic_cpu.hpp"
 #include "io.hpp"
+#include "console_ui.hpp"
 
 #include <string>
 
 namespace emulator
 {
-    class DiagnosticsApplication : public Application
+    class DiagnosticApplication : public Application
     {
         public:
             static constexpr std::size_t romSize = 0;
             static constexpr std::size_t ramSize = 0x10000;
 
-            explicit DiagnosticsApplication();
-            virtual ~DiagnosticsApplication();
+            explicit DiagnosticApplication();
+            virtual ~DiagnosticApplication();
 
             virtual void run();
 
@@ -27,10 +28,17 @@ namespace emulator
 
             void printOutput();
 
+            void handleEvents();
+            void onConsoleEvent(const Console::Event& event);
+
             Console console;
 
             Memory memory;
             EmptyIO io;
-            Cpu cpu;            
+            DiagnosticCpu cpu;  
+
+            ConsoleUI consoleUI;   
+
+            bool running = true;       
     };
 } // namespace emulator

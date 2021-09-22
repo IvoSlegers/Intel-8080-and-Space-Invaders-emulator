@@ -273,9 +273,9 @@ namespace emulator
         instructionsDisplay(console_, cpu_, memory_)
     {}
 
-    void ConsoleUI::initialise()
+    void ConsoleUI::signalMemoryChanged()
     {
-        instructionsDisplay.moveTo(0, false);
+        instructionsDisplay.moveTo(cpu.getState().PC, false);
     }
 
     void ConsoleUI::draw()
@@ -289,7 +289,7 @@ namespace emulator
         console.setCursorPosition(0, console.getScreenSize().height);
     }
 
-    void ConsoleUI::onConsoleKeyEvent(const Console::Event& event)
+    void ConsoleUI::onConsoleEvent(const Console::Event& event)
     {
         if (event.isDirectInput)
         {
@@ -301,10 +301,6 @@ namespace emulator
             InstructionsDisplay::Instruction instruction;
             switch (keyEvent.wVirtualKeyCode)
             {
-                case 'Q':
-                    quitCallback();
-                    break;
-
                 case 'R':
                     cpu.reset();
 

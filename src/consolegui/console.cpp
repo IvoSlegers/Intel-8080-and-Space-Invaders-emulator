@@ -206,4 +206,36 @@ namespace emulator
             return true;
         }
     }
+
+    bool Console::waitForEvent(Event& event)
+    {
+        event.isDirectInput = isInDirectInputMode_;
+        if (isInDirectInputMode_)
+        {
+            INPUT_RECORD record;
+            DWORD numberOfEventsRead;
+
+            while (true)
+            {
+                if (!ReadConsoleInput(inputHandle, &record, 1, &numberOfEventsRead))
+                    return false;
+
+                if (record.EventType != KEY_EVENT)
+                    continue;
+
+                event.keyEvent = record.Event.KeyEvent;
+                    return true;
+            }
+        }
+        else
+        {
+            char buffer[128];
+            DWORD numberOfCharacters;
+            if (!ReadConsoleA(inputHandle, buffer, 128, &numberOfCharacters, nullptr))
+                return false;
+
+            event.line = std::string(buffer, numberOfCharacters);
+            return true;
+        }
+    }
 } // namespace emulator

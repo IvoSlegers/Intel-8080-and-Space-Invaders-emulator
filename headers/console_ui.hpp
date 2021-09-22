@@ -72,13 +72,10 @@ namespace emulator
         public:
             explicit ConsoleUI(Console& console, DiagnosticCpu& cpu, Memory& memory);
 
-            void initialise();
+            void signalMemoryChanged();
             void draw();
 
-            void onConsoleKeyEvent(const Console::Event& event);
-
-            using QuitCallback = std::function<void()>;
-            void setQuitCallback(const QuitCallback& callback) { quitCallback = callback; }
+            void onConsoleEvent(const Console::Event& event);
 
         private: 
             void drawCpuState();
@@ -98,7 +95,6 @@ namespace emulator
             void handleCommand(const std::string& command);
 
             Console& console;
-            QuitCallback quitCallback;
 
             DiagnosticCpu& cpu;
             Memory& memory;

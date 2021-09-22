@@ -1,5 +1,5 @@
 #include "spaceinvaders_application.hpp"
-#include "diagnostics_application.hpp"
+#include "diagnostic_application.hpp"
 
 #include "consolegui/console_exception.hpp"
 #include "emulator_exception.hpp"
@@ -17,9 +17,13 @@
 // - Implement breakpoints system
 // Possible interesting breakpoint 2778
 // - Using a set for breakpoints is potentially slow, replace by large bool array?
-// - GOAL: make emulator compliant
 // - Remove all the 'executed machine cycles += 5' with a table lookup
 // - Make the switch statement nicer (see supersazu's emulator)
+// - Implement a buffer system for the console so we can write a separate log messages page
+// - Or... pipe any output from diagnostics into a file?
+// - Implement a run until end function for cpu diagnostics application
+
+// - GOAL: make emulator compliant
 
 #if EMULATOR_LOG_SFML_ERRORS
     #include <SFML/System.hpp>
@@ -39,7 +43,8 @@ int main(int argc, const char* argv[])
 
     try
     {
-        emulator::SpaceInvadersApplication app;
+        //emulator::SpaceInvadersApplication app;
+        emulator::DiagnosticApplication app;
         app.run();
     }
     catch (const emulator::ConsoleException& exception)

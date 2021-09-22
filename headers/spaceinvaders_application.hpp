@@ -28,7 +28,7 @@ namespace emulator
             void toggleBreakpoint(word address);
 
         private:
-            void onConsoleKeyEvent(const Console::Event& event);
+            void onConsoleEvent(const Console::Event& event);
             void onEvent(const sf::Event& event);
 
             void handleEvents();

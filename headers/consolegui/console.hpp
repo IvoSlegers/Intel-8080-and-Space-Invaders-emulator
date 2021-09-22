@@ -79,6 +79,7 @@ namespace emulator
             bool isInDirectInputMode() const { return isInDirectInputMode_; }
 
             bool pollEvent(Event& event);
+            bool waitForEvent(Event& event);
 
         private:
             HANDLE inputHandle, outputHandle;
