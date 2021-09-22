@@ -2,7 +2,7 @@
 
 #include "defines.hpp"
 #include "spaceinvaders_application.hpp"
-#include "cpu.hpp"
+#include "diagnostic_cpu.hpp"
 #include "memory.hpp"
 #include "opcode_info.hpp"
 #include "to_hex_string.hpp"
@@ -11,8 +11,9 @@
 
 namespace emulator
 {
-    InstructionsDisplay::InstructionsDisplay(SpaceInvadersApplication& application_, Console& console_):
-        application(application_), console(console_), cpu(application.cpu), memory(application.memory)
+    InstructionsDisplay::InstructionsDisplay(Console& console_,
+        DiagnosticCpu& cpu_, Memory& memory_):
+        console(console_), cpu(cpu_), memory(memory_)
     {}
 
     unsigned int InstructionsDisplay::addInstructionToCache(word address)
@@ -81,7 +82,7 @@ namespace emulator
 
             bool isSelected = (index == selectedInstructionIndex);
             bool isCurrent = (instruction.address == cpu.getState().PC);
-            bool isBreakpoint = application.breakpoints.count(instruction.address) != 0;
+            bool isBreakpoint = cpu.isBreakpoint(instruction.address);
 
             drawInstruction(instruction, isSelected, isCurrent, isBreakpoint, x, y + i);
         }
@@ -267,9 +268,9 @@ namespace emulator
         console.setTextColor(Color::White, Color::Black);
     }
 
-    ConsoleUI::ConsoleUI(SpaceInvadersApplication& application_, Console& console_):
-        application(application_), console(console_), cpu(application.cpu), memory(application.memory),
-        instructionsDisplay(application_, console_)
+    ConsoleUI::ConsoleUI(Console& console_, DiagnosticCpu& cpu_, Memory& memory_):
+        console(console_), cpu(cpu_), memory(memory_),
+        instructionsDisplay(console_, cpu_, memory_)
     {}
 
     void ConsoleUI::initialise()
@@ -301,11 +302,11 @@ namespace emulator
             switch (keyEvent.wVirtualKeyCode)
             {
                 case 'Q':
-                    application.quit();
+                    quitCallback();
                     break;
 
                 case 'R':
-                    application.reset();
+                    cpu.reset();
 
                     if (isInFollowMode)
                     {
@@ -316,8 +317,19 @@ namespace emulator
                     break;
 
                 case VK_SPACE:
-                    application.executeSingleStep();
+                    cpu.executeInstructionCycle();
 
+                    if (isInFollowMode)
+                    {
+                        instructionsDisplay.assureInstructionIsDisplayed(cpu.getState().PC);
+                    }
+
+                    draw();
+                    break;
+
+                case VK_TAB:
+                    cpu.executeUntilHalt();
+                    
                     if (isInFollowMode)
                     {
                         instructionsDisplay.assureInstructionIsDisplayed(cpu.getState().PC);
@@ -333,7 +345,7 @@ namespace emulator
                 case 'B':    
                     if (instructionsDisplay.getSelectedInstruction(instruction))
                     {
-                        application.toggleBreakpoint(instruction.address);
+                        cpu.toggleBreakpoint(instruction.address);
                     }
                     draw();
                     break;
@@ -467,23 +479,26 @@ namespace emulator
 
     void ConsoleUI::drawHelp()
     {
-        short y = 6;
-        console.setCursorPosition(54, y++);
+        short x = 54, y = 6;
+        console.setCursorPosition(x, y++);
         console.write("q: Quit");
 
-        console.setCursorPosition(54, y++);
+        console.setCursorPosition(x, y++);
         console.write("r: Reset");
 
-        console.setCursorPosition(54, y++);
+        console.setCursorPosition(x, y++);
         console.write("space: Single step");
 
-        console.setCursorPosition(54, y++);
+        console.setCursorPosition(x, y++);
+        console.write("tab: Run until halt");
+
+        console.setCursorPosition(x, y++);
         console.write("c: Enter command");
 
-        console.setCursorPosition(54, y++);
+        console.setCursorPosition(x, y++);
         console.write("b: Toggle breakpoint");
 
-        console.setCursorPosition(54, y++);
+        console.setCursorPosition(x, y++);
         if (isInFollowMode)
             console.write("f: Disable follow mode");
         else

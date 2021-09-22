@@ -19,6 +19,9 @@ namespace emulator
 
     std::size_t Cpu::executeInstructionCycle()
     {
+        if (state.halt)
+            return 0;
+
         std::size_t previousExecutedMachineCycles = executedMachineCycles;
 
         byte opCode = memory.get(state.PC);
@@ -594,7 +597,7 @@ namespace emulator
                 executedMachineCycles += 5;
                 break;
 
-            case 0x76: // M to M
+            case 0x76: // HLT
                 executedMachineCycles += 7;
                 halt();
                 break;
@@ -1452,6 +1455,19 @@ namespace emulator
         return executedMachineCycles - previousExecutedMachineCycles;
     }
 
+    std::size_t Cpu::executeUntilHalt()
+    {
+        resume();
+        std::size_t machineCycles = 0;
+        
+        while (!state.halt)
+        {
+            machineCycles += executeInstructionCycle();
+        }
+
+        return machineCycles;
+    }
+
     std::size_t Cpu::issueRSTInterrupt(byte address)
     {
         #if EMULATOR_CHECK_INVALID_OPCODES
@@ -1461,7 +1477,9 @@ namespace emulator
 
         if (state.interruptsEnabled)
         {
+            state.halt = false;
             executeRST(address);
+
             return 11;
         }
         else
@@ -1628,10 +1646,4 @@ namespace emulator
     {
         state.interruptsEnabled = enabled;
     }
-
-    void Cpu::halt()
-    {
-        return;
-    }
-
 } // namespace emulator

@@ -32,6 +32,7 @@ namespace emulator
 
         byte Z : 1, S : 1, P : 1, CY : 1, CA : 1;
 
+        bool halt = false;
         bool interruptsEnabled = false;
 
         explicit CpuState(): Z(0), S(0), P(0), CY(0), CA(0) {}
@@ -66,6 +67,7 @@ namespace emulator
             PC = SP = 0;
             Z = S = P = CY = CA = 0;
 
+            halt = false;
             interruptsEnabled = false;
         }
     };

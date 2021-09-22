@@ -2,7 +2,7 @@
 
 #include "application.hpp"
 #include "memory.hpp"
-#include "cpu.hpp"
+#include "diagnostic_cpu.hpp"
 #include "spaceinvaders_io.hpp"
 
 #include "consolegui/console.hpp"
@@ -37,7 +37,7 @@ namespace emulator
 
             Memory memory;
             SpaceInvadersIO io;
-            Cpu cpu;
+            DiagnosticCpu cpu;
 
             sf::RenderWindow window;
             Console console;

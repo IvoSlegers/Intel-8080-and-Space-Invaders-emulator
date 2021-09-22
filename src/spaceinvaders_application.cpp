@@ -8,8 +8,14 @@ namespace emulator
 {
     SpaceInvadersApplication::SpaceInvadersApplication(): memory(0x2000, 0x2000), io(), cpu(memory, io),
         window(sf::VideoMode(800, 600), "intel 8080 - Space Invaders"), console(),
-        consoleUI(*this, console), video(window, memory)
-    {}
+        consoleUI(console, cpu, memory), video(window, memory)
+    {
+        ConsoleUI::QuitCallback callback = [this] ()
+        {
+            window.close();
+        };
+        consoleUI.setQuitCallback(callback);
+    }
 
     void SpaceInvadersApplication::run()
     {
@@ -53,12 +59,7 @@ namespace emulator
 
     void SpaceInvadersApplication::toggleBreakpoint(word address)
     {
-        std::set<word>::iterator i = breakpoints.find(address);
-
-        if (i == breakpoints.end())
-            breakpoints.insert(address);           
-        else
-            breakpoints.erase(i);           
+         
     }
 
     void SpaceInvadersApplication::onConsoleKeyEvent(const Console::Event& event)

@@ -6,15 +6,15 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <functional>
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 namespace emulator
 {
-    class SpaceInvadersApplication;
     class Memory;
-    struct Cpu;
+    class DiagnosticCpu;
 
     class InstructionsDisplay
     {
@@ -26,7 +26,8 @@ namespace emulator
                 std::string arguments;
             };
 
-            explicit InstructionsDisplay(SpaceInvadersApplication& application, Console& console);
+            explicit InstructionsDisplay(Console& console, DiagnosticCpu& cpu,
+                Memory& memory);
 
             void draw(short x, short y);
 
@@ -47,10 +48,9 @@ namespace emulator
         private:
             static const unsigned short numberOfInstructionsDisplayed = 16;
 
-            SpaceInvadersApplication& application;
             Console& console;
 
-            Cpu& cpu;
+            DiagnosticCpu& cpu;
             Memory& memory;
 
             unsigned int addInstructionToCache(word address);
@@ -70,12 +70,15 @@ namespace emulator
     class ConsoleUI
     {
         public:
-            explicit ConsoleUI(SpaceInvadersApplication& application, Console& console);
+            explicit ConsoleUI(Console& console, DiagnosticCpu& cpu, Memory& memory);
 
             void initialise();
             void draw();
 
             void onConsoleKeyEvent(const Console::Event& event);
+
+            using QuitCallback = std::function<void()>;
+            void setQuitCallback(const QuitCallback& callback) { quitCallback = callback; }
 
         private: 
             void drawCpuState();
@@ -94,11 +97,11 @@ namespace emulator
 
             void handleCommand(const std::string& command);
 
-            SpaceInvadersApplication& application;
             Console& console;
+            QuitCallback quitCallback;
 
-            const Cpu& cpu;
-            const Memory& memory;
+            DiagnosticCpu& cpu;
+            Memory& memory;
 
             InstructionsDisplay instructionsDisplay;
 

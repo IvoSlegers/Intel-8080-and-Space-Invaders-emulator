@@ -31,6 +31,8 @@ namespace emulator
             // Returns the number of machine cycles needed to execute the command.
             std::size_t executeInstructionCycle();
 
+            std::size_t executeUntilHalt();
+
             const Memory& getMemory() const { return memory; }
             const CpuState& getState() const { return state; }
 
@@ -45,9 +47,11 @@ namespace emulator
                 return issueRSTInterrupt(static_cast<byte>(instruction));
             }
 
+            void halt() { state.halt = true; } 
+            void resume() { state.halt = false; }
             void setProgramCounter(word address) { state.PC = address; }
 
-        private:
+        protected:
             Memory& memory;
             IO& io;
             CpuState state;
@@ -55,6 +59,7 @@ namespace emulator
             std::size_t executedInstructionCycles = 0;
             std::size_t executedMachineCycles = 0;
 
+        private:
             void setZSPFlags(byte result);
 
             void executeINR(byte& reg);
@@ -76,6 +81,5 @@ namespace emulator
 
             void executeRST(byte address);
             void setEnableInterrupts(bool enabled);
-            void halt();
     };
 } // namespace emulator

@@ -4,7 +4,6 @@
 #include <windows.h>
 
 #include <string>
-#include <functional>
 
 namespace emulator
 {

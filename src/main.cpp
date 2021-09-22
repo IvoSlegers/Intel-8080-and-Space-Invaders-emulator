@@ -20,14 +20,12 @@
 // - GOAL: make emulator compliant
 // - Remove all the 'executed machine cycles += 5' with a table lookup
 // - Make the switch statement nicer (see supersazu's emulator)
-// - Decouple ConsoleUI from spaceinvadersapplication (big old large constructor)
 
 #if EMULATOR_LOG_SFML_ERRORS
     #include <SFML/System.hpp>
     #include <fstream>
     #include <chrono>
 #endif
-
 
 int main(int argc, const char* argv[])
 {
@@ -41,8 +39,7 @@ int main(int argc, const char* argv[])
 
     try
     {
-        //emulator::SpaceInvadersApplication app;
-        emulator::DiagnosticsApplication app;
+        emulator::SpaceInvadersApplication app;
         app.run();
     }
     catch (const emulator::ConsoleException& exception)
