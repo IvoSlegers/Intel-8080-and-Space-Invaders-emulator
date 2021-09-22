@@ -21,6 +21,8 @@ namespace emulator
             word getWord(word address) const;
             void setWord(word address, word value);
 
+            void clear();
+
             std::size_t getRomSize() const
             {
                 return romSize;
@@ -36,8 +38,8 @@ namespace emulator
                 return totalSize;
             }
 
-            std::size_t loadROMFromFile(const std::string& path, std::size_t offset = 0);
-            void loadROMFromFiles(const std::vector<std::string> paths, std::size_t offset = 0);
+            std::size_t loadMemoryFromFile(const std::string& path, std::size_t offset = 0);
+            void loadMemoryFromFiles(const std::vector<std::string> paths, std::size_t offset = 0);
 
         private:
             std::size_t romSize = 0;

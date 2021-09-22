@@ -31,8 +31,8 @@ namespace emulator
             // Returns the number of machine cycles needed to execute the command.
             std::size_t executeInstructionCycle();
 
-            const Memory& getMemory() const { return memory;}
-            const CpuState& getState() const { return state;}
+            const Memory& getMemory() const { return memory; }
+            const CpuState& getState() const { return state; }
 
             const std::size_t getExecutedInstructionCyles() const { return executedInstructionCycles; }
             const std::size_t getExecutedMachineCyles() const { return executedMachineCycles; }
@@ -44,6 +44,8 @@ namespace emulator
             {
                 return issueRSTInterrupt(static_cast<byte>(instruction));
             }
+
+            void setProgramCounter(word address) { state.PC = address; }
 
         private:
             Memory& memory;

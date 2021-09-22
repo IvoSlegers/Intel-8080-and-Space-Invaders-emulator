@@ -3,3 +3,4 @@
 *.dll
 *.ttf
 *.o
+cpu_diagnostics/*

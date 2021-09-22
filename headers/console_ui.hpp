@@ -12,7 +12,7 @@
 
 namespace emulator
 {
-    class Application;
+    class SpaceInvadersApplication;
     class Memory;
     struct Cpu;
 
@@ -26,7 +26,7 @@ namespace emulator
                 std::string arguments;
             };
 
-            explicit InstructionsDisplay(Application& application, Console& console);
+            explicit InstructionsDisplay(SpaceInvadersApplication& application, Console& console);
 
             void draw(short x, short y);
 
@@ -47,7 +47,7 @@ namespace emulator
         private:
             static const unsigned short numberOfInstructionsDisplayed = 16;
 
-            Application& application;
+            SpaceInvadersApplication& application;
             Console& console;
 
             Cpu& cpu;
@@ -70,7 +70,7 @@ namespace emulator
     class ConsoleUI
     {
         public:
-            explicit ConsoleUI(Application& application, Console& console);
+            explicit ConsoleUI(SpaceInvadersApplication& application, Console& console);
 
             void initialise();
             void draw();
@@ -92,7 +92,9 @@ namespace emulator
 
             void showMessage(const std::string& message);
 
-            Application& application;
+            void handleCommand(const std::string& command);
+
+            SpaceInvadersApplication& application;
             Console& console;
 
             const Cpu& cpu;

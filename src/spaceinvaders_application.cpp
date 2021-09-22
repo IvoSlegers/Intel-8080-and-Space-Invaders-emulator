@@ -1,4 +1,4 @@
-#include "application.hpp"
+#include "spaceinvaders_application.hpp"
 
 #include "to_hex_string.hpp"
 
@@ -6,14 +6,14 @@
 
 namespace emulator
 {
-    Application::Application(): memory(0x2000, 0x2000), io(), cpu(memory, io),
+    SpaceInvadersApplication::SpaceInvadersApplication(): memory(0x2000, 0x2000), io(), cpu(memory, io),
         window(sf::VideoMode(800, 600), "intel 8080 - Space Invaders"), console(),
         consoleUI(*this, console), video(window, memory)
     {}
 
-    void Application::run()
+    void SpaceInvadersApplication::run()
     {
-        memory.loadROMFromFile("invaders.rom");
+        memory.loadMemoryFromFile("invaders.rom");
 
         window.setFramerateLimit(60);
 
@@ -34,24 +34,24 @@ namespace emulator
         }
     }
 
-    void Application::reset()
+    void SpaceInvadersApplication::reset()
     {
         cpu.reset();
         consoleUI.draw();
     }
 
-    void Application::quit()
+    void SpaceInvadersApplication::quit()
     {
         window.close();
     }
 
-    void Application::executeSingleStep()
+    void SpaceInvadersApplication::executeSingleStep()
     {
         cpu.executeInstructionCycle();
         consoleUI.draw();
     }
 
-    void Application::toggleBreakpoint(word address)
+    void SpaceInvadersApplication::toggleBreakpoint(word address)
     {
         std::set<word>::iterator i = breakpoints.find(address);
 
@@ -61,12 +61,12 @@ namespace emulator
             breakpoints.erase(i);           
     }
 
-    void Application::onConsoleKeyEvent(const Console::Event& event)
+    void SpaceInvadersApplication::onConsoleKeyEvent(const Console::Event& event)
     {
         consoleUI.onConsoleKeyEvent(event);
     }
 
-    void Application::onEvent(const sf::Event& event)
+    void SpaceInvadersApplication::onEvent(const sf::Event& event)
     {
         // if (event.type == sf::Event::Closed)
         //     window.close();
@@ -81,7 +81,7 @@ namespace emulator
         // }
     }
 
-    void Application::handleEvents()
+    void SpaceInvadersApplication::handleEvents()
     {
         sf::Event event;
         while (window.pollEvent(event))
@@ -92,7 +92,7 @@ namespace emulator
             onConsoleKeyEvent(consoleEvent);
     }
 
-    void Application::update(float delta)
+    void SpaceInvadersApplication::update(float delta)
     {
         // machineCyclesToBeExecuted += delta * 2'000'000;
 
@@ -155,7 +155,7 @@ namespace emulator
         }        
     }
 
-    void Application::draw()
+    void SpaceInvadersApplication::draw()
     {
         window.clear(sf::Color::Black);
 
@@ -164,7 +164,7 @@ namespace emulator
         window.display();
     }
 
-    void Application::triggerBreakpoint()
+    void SpaceInvadersApplication::triggerBreakpoint()
     {
         consoleUI.draw();
         running = false;

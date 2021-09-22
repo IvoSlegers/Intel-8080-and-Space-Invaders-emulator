@@ -1,4 +1,5 @@
-#include "application.hpp"
+#include "spaceinvaders_application.hpp"
+#include "diagnostics_application.hpp"
 
 #include "consolegui/console_exception.hpp"
 #include "emulator_exception.hpp"
@@ -16,8 +17,10 @@
 // - Implement breakpoints system
 // Possible interesting breakpoint 2778
 // - Using a set for breakpoints is potentially slow, replace by large bool array?
-// - Implement a follow state.PC mode
-// - re-examine the consoleui dialog stuff, at the moment backspace doesn't work
+// - GOAL: make emulator compliant
+// - Remove all the 'executed machine cycles += 5' with a table lookup
+// - Make the switch statement nicer (see supersazu's emulator)
+// - Decouple ConsoleUI from spaceinvadersapplication (big old large constructor)
 
 #if EMULATOR_LOG_SFML_ERRORS
     #include <SFML/System.hpp>
@@ -26,7 +29,7 @@
 #endif
 
 
-int main(void)
+int main(int argc, const char* argv[])
 {
     #if EMULATOR_LOG_SFML_ERRORS
         std::ofstream logFile("error_log.txt", std::ios_base::app);
@@ -38,7 +41,8 @@ int main(void)
 
     try
     {
-        emulator::Application app;
+        //emulator::SpaceInvadersApplication app;
+        emulator::DiagnosticsApplication app;
         app.run();
     }
     catch (const emulator::ConsoleException& exception)

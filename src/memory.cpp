@@ -5,6 +5,7 @@
 
 #include <sstream>
 #include <fstream>
+#include <cstring>
 
 namespace emulator
 {
@@ -85,17 +86,25 @@ namespace emulator
         wordAsBytePair(value, data[address + 1], data[address]);
     }
 
-    std::size_t Memory::loadROMFromFile(const std::string& path, std::size_t offset)
+    void Memory::clear()
+    {
+        std::memset(data.get(), 0, totalSize);
+    }
+
+    std::size_t Memory::loadMemoryFromFile(const std::string& path, std::size_t offset)
     {
         std::ifstream file(path, std::ios::out | std::ios::binary | std::ios::ate);
 
+        if (!file)
+            throw EmulatorException("Unable to open file " + path + '.');
+
         std::streamsize size = file.tellg();
 
-        if (offset + size > romSize)
+        if (offset + size > getTotalSize())
         {
             throw EmulatorException(
                 "Loading file " + path + " at offset " + std::to_string(offset) +
-                " exceeds ROM range (" + std::to_string(romSize) + ").");
+                " exceeds memory bounds (" + std::to_string(totalSize) + ").");
         }
 
         file.seekg(0);
@@ -104,9 +113,9 @@ namespace emulator
         return offset + size;
     }
 
-    void Memory::loadROMFromFiles(const std::vector<std::string> paths, std::size_t offset)
+    void Memory::loadMemoryFromFiles(const std::vector<std::string> paths, std::size_t offset)
     {
         for (const std::string& path : paths)
-            offset = loadROMFromFile(path, offset);
+            offset = loadMemoryFromFile(path, offset);
     }
 } // namespace emulator

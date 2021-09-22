@@ -1,7 +1,7 @@
 #include "console_ui.hpp"
 
 #include "defines.hpp"
-#include "application.hpp"
+#include "spaceinvaders_application.hpp"
 #include "cpu.hpp"
 #include "memory.hpp"
 #include "opcode_info.hpp"
@@ -11,7 +11,7 @@
 
 namespace emulator
 {
-    InstructionsDisplay::InstructionsDisplay(Application& application_, Console& console_):
+    InstructionsDisplay::InstructionsDisplay(SpaceInvadersApplication& application_, Console& console_):
         application(application_), console(console_), cpu(application.cpu), memory(application.memory)
     {}
 
@@ -267,7 +267,7 @@ namespace emulator
         console.setTextColor(Color::White, Color::Black);
     }
 
-    ConsoleUI::ConsoleUI(Application& application_, Console& console_):
+    ConsoleUI::ConsoleUI(SpaceInvadersApplication& application_, Console& console_):
         application(application_), console(console_), cpu(application.cpu), memory(application.memory),
         instructionsDisplay(application_, console_)
     {}
@@ -378,17 +378,11 @@ namespace emulator
                     draw();
                     break;
             }
-
-            console.setCursorPosition(54, 2);
-            console.write("direct");
         }
         else
         {
             const std::string& line = event.line;
             showMessage(line);
-
-            console.setCursorPosition(54, 2);
-            console.write("line");
 
             endDialog();
         }
@@ -536,6 +530,11 @@ namespace emulator
 
         console.setCursorPosition(0, console.getScreenSize().height);
         console.write(message);
+    }
+
+    void ConsoleUI::handleCommand(const std::string& command)
+    {
+        return;
     }
 
 } // namespace emulator

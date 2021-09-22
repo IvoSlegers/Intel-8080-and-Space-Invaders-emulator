@@ -49,6 +49,7 @@
         "valarray": "cpp",
         "bitset": "cpp",
         "chrono": "cpp",
-        "ratio": "cpp"
+        "ratio": "cpp",
+        "set": "cpp"
     }
 }

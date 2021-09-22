@@ -14,10 +14,10 @@ namespace emulator
             virtual void set(byte port, byte value) = 0;
     };
 
-    class EmptyIO : public IO
+    class NotImplementedIO : public IO
     {
         public:
-            virtual ~EmptyIO() {}
+            virtual ~NotImplementedIO() {}
 
             virtual byte get(byte port) const
             {
@@ -27,6 +27,22 @@ namespace emulator
             virtual void set(byte port, byte value)
             {
                 throw EmulatorException("Writing to IO port is not possible. IO operations are not implemented.");
+            }
+    };
+
+    class EmptyIO : public IO
+    {
+        public:
+            virtual ~EmptyIO() {}
+
+            virtual byte get(byte port) const
+            {
+                return 0;
+            }
+
+            virtual void set(byte port, byte value)
+            {
+                return;
             }
     };
 } // namespace emulator
