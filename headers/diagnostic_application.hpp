@@ -39,6 +39,7 @@ namespace emulator
 
             ConsoleUI consoleUI;   
 
-            bool running = true;       
+            bool running = true;
+            bool runningAutonomously = false;   
     };
 } // namespace emulator

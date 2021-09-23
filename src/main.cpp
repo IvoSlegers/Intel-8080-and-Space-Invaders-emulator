@@ -22,6 +22,7 @@
 // - Implement a buffer system for the console so we can write a separate log messages page
 // - Or... pipe any output from diagnostics into a file?
 // - Implement a run until end function for cpu diagnostics application
+// - implement move, view, breakpoint commands
 
 // - GOAL: make emulator compliant
 
@@ -41,27 +42,29 @@ int main(int argc, const char* argv[])
         sf::err().rdbuf(logFile.rdbuf());
     #endif
 
-    try
-    {
-        //emulator::SpaceInvadersApplication app;
-        emulator::DiagnosticApplication app;
-        app.run();
-    }
-    catch (const emulator::ConsoleException& exception)
-    {
-        std::cerr << "Console exception: " << exception.getMessage() << '\n';
-        std::cin.get();
-    }
-    catch (const emulator::EmulatorException& exception)
-    {
-        std::cerr << "Emulator exception: " << exception.getMessage() << '\n';
-        std::cin.get();     
-    }
-    catch (const std::exception& exception)
-    {
-        std::cerr << "Std exception: " << exception.what() << '\n';
-        std::cin.get();
-    }
+    // try
+    // {
+    //     //emulator::SpaceInvadersApplication app;
+    //     emulator::DiagnosticApplication app;
+    //     app.run();
+    // }
+    // catch (const emulator::ConsoleException& exception)
+    // {
+    //     std::cerr << "Console exception: " << exception.getMessage() << '\n';
+    //     std::cin.get();
+    // }
+    // catch (const emulator::EmulatorException& exception)
+    // {
+    //     std::cerr << "Emulator exception: " << exception.getMessage() << '\n';
+    //     std::cin.get();     
+    // }
+    // catch (const std::exception& exception)
+    // {
+    //     std::cerr << "Std exception: " << exception.what() << '\n';
+    //     std::cin.get();
+    // }
 
-    return 0;
+    // return 0;
+
+    
 }

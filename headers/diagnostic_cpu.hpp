@@ -18,6 +18,9 @@ namespace emulator
             void toggleBreakpoint(word address);
             bool isBreakpoint(word address);
 
+            void saveBreakpoints(const std::string& path);
+            void loadBreakpoints(const std::string& path);
+
         private:
             std::set<word> breakpoints;
     };

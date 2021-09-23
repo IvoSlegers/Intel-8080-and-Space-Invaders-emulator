@@ -9,6 +9,9 @@
 
 #include "consolegui\console.hpp"
 
+#include <regex>
+#include <iostream>
+
 namespace emulator
 {
     InstructionsDisplay::InstructionsDisplay(Console& console_,
@@ -372,8 +375,8 @@ namespace emulator
                     break;
 
                 case VK_LEFT:
-                        instructionsDisplay.moveBack();
-                        draw();
+                    instructionsDisplay.moveBack();
+                    draw();
                     break;
 
                 case VK_PRIOR: //Page Up
@@ -389,10 +392,9 @@ namespace emulator
         }
         else
         {
-            const std::string& line = event.line;
-            showMessage(line);
-
             endDialog();
+
+            handleCommand(event.line);
         }
     }
 
@@ -545,6 +547,89 @@ namespace emulator
 
     void ConsoleUI::handleCommand(const std::string& command)
     {
+        std::smatch match;
+        
+        std::regex commandWithAddressRegex(R"--(\s*(\w+)\s+([0-9|a-f]{1,4})\s*)--",
+             std::regex_constants::icase);
+        
+        if (std::regex_match(command, match, commandWithAddressRegex))
+        {
+            if (match.size() != 3)
+            {
+                showMessage("Command not recognised.");
+                return;
+            }
+
+            std::string commandString(match[1].length(), ' ');
+            std::transform(match[1].first, match[1].second, commandString.begin(), 
+                [] (char c) { return std::tolower(c); });
+
+            // Because match[1] matches the regex it must be well-formed.
+            word address = std::stoi(match[2], nullptr, 16);
+
+            if (commandString == "breakpoint")
+            {
+                cpu.toggleBreakpoint(address);
+                draw();
+                return;
+            }
+
+            if (commandString == "goto" || commandString == "move")
+            {
+                cpu.setProgramCounter(address);
+
+                if (isInFollowMode)
+                {
+                    instructionsDisplay.assureInstructionIsDisplayed(cpu.getState().PC);
+                }
+
+                draw();
+
+                return;
+            }
+
+            if (commandString == "view")
+            {
+                instructionsDisplay.moveTo(address);
+                draw();
+
+                return;
+            }
+        }     
+
+        std::regex commandWithFilenameRegex(R"--(\s*(\w+)\s+((\w+)(.\w+)?)\s*)--",
+            std::regex_constants::icase);
+
+        if (std::regex_match(command, match, commandWithFilenameRegex))
+        {
+            if (match.size() != 5)
+            {
+                showMessage("Command not recognised.");
+                return;
+            }
+
+            std::string commandString(match[1].length(), ' ');
+            std::transform(match[1].first, match[1].second, commandString.begin(), 
+                [] (char c) { return std::tolower(c); });
+
+            if (commandString == "save")
+            {
+                cpu.saveBreakpoints(match[2]);
+                draw();
+                
+                return;
+            }
+
+            if (commandString == "load")
+            {
+                cpu.loadBreakpoints(match[2]);
+                draw();
+
+                return;
+            }
+        }
+
+        showMessage("Command not recognised.");
         return;
     }
 

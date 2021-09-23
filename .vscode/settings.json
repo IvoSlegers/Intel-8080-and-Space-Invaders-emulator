@@ -50,6 +50,7 @@
         "bitset": "cpp",
         "chrono": "cpp",
         "ratio": "cpp",
-        "set": "cpp"
+        "set": "cpp",
+        "regex": "cpp"
     }
 }

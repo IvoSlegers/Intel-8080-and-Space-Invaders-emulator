@@ -40,14 +40,17 @@ namespace emulator
         running = true;
         while (running)
         {
-            handleEvents();
+            if (!runningAutonomously)
+                handleEvents();
+            else
+                cpu.executeInstructionCycle();
 
             word pc = cpu.getState().PC;
 
             if (pc == 0x0000)
             {
                 std::cout << "\nProgram terminated\n";
-                break;
+                runningAutonomously = false;
             }
 
             if (pc == 0x0005)
@@ -113,6 +116,9 @@ namespace emulator
 
         if (event.isDirectInput && event.keyEvent.uChar.AsciiChar == 'q')
             running = false;
+
+        if (event.isDirectInput && event.keyEvent.uChar.AsciiChar == 'a')
+            runningAutonomously = true;
 
         consoleUI.onConsoleEvent(event);
     }

@@ -1,5 +1,9 @@
 #include "diagnostic_cpu.hpp"
 
+#include "emulator_exception.hpp"
+
+#include <fstream>
+
 namespace emulator
 {
     DiagnosticCpu::DiagnosticCpu(Memory& memory_, IO& io_): Cpu(memory_, io_)
@@ -39,5 +43,31 @@ namespace emulator
     bool DiagnosticCpu::isBreakpoint(word address)
     {
         return breakpoints.count(address) != 0;
+    }
+
+    void DiagnosticCpu::saveBreakpoints(const std::string& path)
+    {
+        std::ofstream file(path);
+
+        if (!file)
+            throw EmulatorException("Unable to open file " + path + '.');
+
+        for (word address : breakpoints)
+            file << address << ' ';
+    }
+
+    void DiagnosticCpu::loadBreakpoints(const std::string& path)
+    {
+        std::ifstream file(path);
+
+        if (!file)
+            throw EmulatorException("Unable to open file " + path + '.');
+
+        breakpoints.clear();
+        word address;
+        while (file >> address)
+        {
+            breakpoints.insert(breakpoints.end(), address);
+        }
     }
 } // namespace emulator
