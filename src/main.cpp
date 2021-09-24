@@ -25,6 +25,9 @@
 // - implement move, view, breakpoint commands
 // - Make classes that need to be non-copyable
 // - Look at unique_ptr to see how a move-only class should be implemented.
+// - Properly implement a executed instructions log (move run until halt & logging into consoleUI)
+// - Implement cyc checking?
+// - re-enable check bounds
 
 // - GOAL: make emulator compliant
 

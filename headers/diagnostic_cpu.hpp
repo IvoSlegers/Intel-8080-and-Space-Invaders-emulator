@@ -11,7 +11,7 @@ namespace emulator
         public:
             DiagnosticCpu(Memory&, IO&); 
             
-            void executeIntructionCycle();
+            std::size_t executeInstructionCycle();
             
             void addBreakpoint(word address);
             void removeBreakpoint(word address);

@@ -784,7 +784,7 @@ namespace emulator
         1
     };
 
-    std::string formatInstructionArguments(byte opCode, byte byte2, byte byte3)
+    inline std::string formatInstructionArguments(byte opCode, byte byte2, byte byte3)
     {   
         std::size_t pos = arguments[opCode].find("bb", 0);
         if (pos != std::string::npos)

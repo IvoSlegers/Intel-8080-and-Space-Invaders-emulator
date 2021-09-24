@@ -349,7 +349,7 @@ namespace emulator
 
                 if ((state.A & 0xFA) > (9 << 4) || state.CY)
                 {
-                    state.A += (9 << 4);
+                    state.A += (6 << 4);
                     state.CY = 1;
                 }
                 // Note: the carry bit is not reset in this case.

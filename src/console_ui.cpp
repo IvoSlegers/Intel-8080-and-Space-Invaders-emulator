@@ -152,7 +152,7 @@ namespace emulator
         moveTo(address, false);
     }
 
-    void InstructionsDisplay::assureInstructionIsDisplayed(word address)
+    void InstructionsDisplay::ensureInstructionIsDisplayed(word address)
     {
         int firstAddress = displayedInstructionsCache.front().address;
         int lastAddress = displayedInstructionsCache.back().address;
@@ -307,15 +307,11 @@ namespace emulator
                 return;
 
             InstructionsDisplay::Instruction instruction;
+            std::size_t index;
             switch (keyEvent.wVirtualKeyCode)
             {
                 case 'R':
                     cpu.reset();
-
-                    if (isInFollowMode)
-                    {
-                        instructionsDisplay.assureInstructionIsDisplayed(cpu.getState().PC);
-                    }
 
                     draw();
                     break;
@@ -323,19 +319,12 @@ namespace emulator
                 case VK_SPACE:
                     cpu.executeInstructionCycle();
 
-                    if (isInFollowMode)
-                    {
-                        instructionsDisplay.assureInstructionIsDisplayed(cpu.getState().PC);
-                    }
-
                     draw();
                     break;
 
                 case VK_TAB:
-                    if (console.getActiveScreenBufferIndex() != 0)
-                        console.restoreDefaultScreenBuffer();
-                    else if (console.getNumberOfScreenBuffers() > 1)
-                        console.setActiveScreenBuffer(1);
+                    index = (console.getActiveScreenBufferIndex() + 1) % console.getNumberOfScreenBuffers();
+                    console.setActiveScreenBuffer(index);
                         
                     break;
 
@@ -449,6 +438,9 @@ namespace emulator
 
         console.setCursorPosition(40, 2);
         console.write(std::string("Interruptions ") + (state.interruptsEnabled ? "enabled" : "disabled"));
+
+        if (isInFollowMode)
+            instructionsDisplay.ensureInstructionIsDisplayed(state.PC);
 
         instructionsDisplay.draw(0, 6);
     }
@@ -579,11 +571,6 @@ namespace emulator
             if (commandString == "goto" || commandString == "move")
             {
                 cpu.setProgramCounter(address);
-
-                if (isInFollowMode)
-                {
-                    instructionsDisplay.assureInstructionIsDisplayed(cpu.getState().PC);
-                }
 
                 draw();
 

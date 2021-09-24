@@ -37,7 +37,7 @@ namespace emulator
             bool moveToTarget(const Instruction& instruction);
             void moveBack();
 
-            void assureInstructionIsDisplayed(word address);
+            void ensureInstructionIsDisplayed(word address);
 
             void moveSelectionUp();
             void moveSelectionDown();
