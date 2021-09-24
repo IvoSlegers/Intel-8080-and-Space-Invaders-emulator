@@ -2,8 +2,6 @@
 
 #include "to_hex_string.hpp"
 
-#include <iostream>
-
 namespace emulator
 {
     SpaceInvadersApplication::SpaceInvadersApplication(): memory(0x2000, 0x2000), io(), cpu(memory, io),

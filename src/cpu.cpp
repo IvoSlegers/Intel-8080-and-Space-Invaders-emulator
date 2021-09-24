@@ -19,7 +19,7 @@ namespace emulator
 
     std::size_t Cpu::executeInstructionCycle()
     {
-        if (state.halt)
+        if (state.halted)
             return 0;
 
         std::size_t previousExecutedMachineCycles = executedMachineCycles;
@@ -1446,7 +1446,7 @@ namespace emulator
 
             #if EMULATOR_CHECK_INVALID_OPCODES
             default:
-                throw EmulatorException("Invalid opcode (0x" + toHexString(opCode) + ") encountered.");
+                throw EmulatorException("Invalid opcode (0x" + toHexString(opCode) + ") encountered in Cpu::executeInstructionCycle.");
             #endif
         }
 
@@ -1460,7 +1460,7 @@ namespace emulator
         resume();
         std::size_t machineCycles = 0;
         
-        while (!state.halt)
+        while (!state.halted)
         {
             machineCycles += executeInstructionCycle();
         }
@@ -1472,12 +1472,12 @@ namespace emulator
     {
         #if EMULATOR_CHECK_INVALID_OPCODES
             if (address > 56 || (address % 8) != 0)
-                throw EmulatorException("Invalid address (0x" + toHexString(address) + ") supplied to for RST interrupt.");
+                throw EmulatorException("Invalid address (0x" + toHexString(address) + ") supplied to for RST interrupt in Cpu::issueRSTInterrupt.");
         #endif
 
         if (state.interruptsEnabled)
         {
-            state.halt = false;
+            state.halted = false;
             executeRST(address);
 
             return 11;

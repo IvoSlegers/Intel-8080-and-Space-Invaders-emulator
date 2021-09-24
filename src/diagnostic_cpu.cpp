@@ -50,7 +50,7 @@ namespace emulator
         std::ofstream file(path);
 
         if (!file)
-            throw EmulatorException("Unable to open file " + path + '.');
+            throw EmulatorException("Unable to open file " + path + " in DiagnosticCpu::saveBreakpoints.");
 
         for (word address : breakpoints)
             file << address << ' ';
@@ -61,7 +61,7 @@ namespace emulator
         std::ifstream file(path);
 
         if (!file)
-            throw EmulatorException("Unable to open file " + path + '.');
+            throw EmulatorException("Unable to open file " + path + " in DiagnosticCpu::loadBreakpoints.");
 
         breakpoints.clear();
         word address;

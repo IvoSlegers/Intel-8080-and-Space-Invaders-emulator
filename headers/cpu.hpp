@@ -47,8 +47,8 @@ namespace emulator
                 return issueRSTInterrupt(static_cast<byte>(instruction));
             }
 
-            void halt() { state.halt = true; } 
-            void resume() { state.halt = false; }
+            void halt() { state.halted = true; } 
+            void resume() { state.halted = false; }
             void setProgramCounter(word address) { state.PC = address; }
 
         protected:

@@ -8,9 +8,9 @@
 #include "to_hex_string.hpp"
 
 #include "consolegui\console.hpp"
+using Color = console::Color;
 
 #include <regex>
-#include <iostream>
 
 namespace emulator
 {
@@ -283,6 +283,9 @@ namespace emulator
 
     void ConsoleUI::draw()
     {
+        std::size_t previousScreenBufferIndex = console.getActiveScreenBufferIndex();
+        console.restoreDefaultScreenBuffer();
+
         console.clear();
 
         drawCpuState();
@@ -290,6 +293,8 @@ namespace emulator
         drawDialog();
 
         console.setCursorPosition(0, console.getScreenSize().height);
+
+        console.setActiveScreenBuffer(previousScreenBufferIndex);
     }
 
     void ConsoleUI::onConsoleEvent(const Console::Event& event)
@@ -327,14 +332,11 @@ namespace emulator
                     break;
 
                 case VK_TAB:
-                    cpu.executeUntilHalt();
-                    
-                    if (isInFollowMode)
-                    {
-                        instructionsDisplay.assureInstructionIsDisplayed(cpu.getState().PC);
-                    }
-
-                    draw();
+                    if (console.getActiveScreenBufferIndex() != 0)
+                        console.restoreDefaultScreenBuffer();
+                    else if (console.getNumberOfScreenBuffers() > 1)
+                        console.setActiveScreenBuffer(1);
+                        
                     break;
 
                 case 'C':
@@ -488,7 +490,7 @@ namespace emulator
         console.write("space: Single step");
 
         console.setCursorPosition(x, y++);
-        console.write("tab: Run until halt");
+        console.write("tab: View program output");
 
         console.setCursorPosition(x, y++);
         console.write("c: Enter command");

@@ -7,7 +7,10 @@ namespace emulator
 {
     DiagnosticApplication::DiagnosticApplication(): 
         memory(romSize, ramSize), io(), cpu(memory, io), consoleUI(console, cpu, memory)
-    {}
+    {
+        console.createScreenBuffer();
+        console.getScreenBuffer(1).setBufferSize({120, 9000});
+    }
 
     DiagnosticApplication::~DiagnosticApplication()
     {}
@@ -23,8 +26,8 @@ namespace emulator
         memory.clear();
         cpu.reset();
 
-        std::cout << "-- Starting diagnostic --\n";
-        std::cout << "Loading .ROM file: " << filename << '\n';
+        console.getScreenBuffer(1).write("-- Starting diagnostic --\n");
+        console.getScreenBuffer(1).write("Loading .ROM file: " + filename + '\n');
 
         memory.loadMemoryFromFile(filename, 0x100);
         consoleUI.signalMemoryChanged();
@@ -38,18 +41,26 @@ namespace emulator
         consoleUI.draw();
 
         running = true;
+        word previousPC = cpu.getState().PC;
         while (running)
         {
             if (!runningAutonomously)
                 handleEvents();
             else
+            {
+                console.getScreenBuffer(1).write(" - " + std::to_string(cpu.getState().PC) + (cpu.getState().halted ? " halted\n" : " running\n"));
                 cpu.executeInstructionCycle();
+            }                
 
             word pc = cpu.getState().PC;
 
+            if (previousPC == pc)
+                continue;
+            previousPC = pc;
+
             if (pc == 0x0000)
             {
-                std::cout << "\nProgram terminated\n";
+                console.getScreenBuffer(1).write("\nProgram terminated\n");
                 runningAutonomously = false;
             }
 
@@ -83,7 +94,7 @@ namespace emulator
 
         if (operation == 2) // Print one character (stored in E)
         {
-            std::cout << static_cast<char>(state.E);
+            console.getScreenBuffer(1).write(std::string(1, static_cast<char>(state.E)));
         }
         else if (operation == 9)
         {
@@ -94,7 +105,7 @@ namespace emulator
 
                 if (character == '$') break;
 
-                std::cout << character;
+                console.getScreenBuffer(1).write(std::string(1, static_cast<char>(character)));
             }   
         }        
     }
@@ -118,7 +129,12 @@ namespace emulator
             running = false;
 
         if (event.isDirectInput && event.keyEvent.uChar.AsciiChar == 'a')
+        {
+            console.getDefaultScreenBuffer().setCursorPosition(0, console.getDefaultScreenBuffer().getScreenSize().height);
+            console.getDefaultScreenBuffer().write("running autonomously");
             runningAutonomously = true;
+        }
+            
 
         consoleUI.onConsoleEvent(event);
     }

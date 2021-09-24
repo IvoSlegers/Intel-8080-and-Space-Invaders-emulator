@@ -1,7 +1,9 @@
 #pragma once
 
 #include "int_types.hpp"
+
 #include "consolegui/console.hpp"
+using Console = console::Console;
 
 #include <vector>
 #include <string>

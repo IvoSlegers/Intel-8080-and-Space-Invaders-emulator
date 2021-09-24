@@ -16,7 +16,7 @@ namespace emulator
         {
             std::stringstream stream;
             stream << "Requested memory size (" << romSize << " + " << ramSize 
-                << ") exceeds maximum possible size (" << maxMemorySize << ").";
+                << ") exceeds maximum possible size (" << maxMemorySize << ") in Memory::Memory.";
             throw EmulatorException(stream.str());
         }
 
@@ -28,11 +28,11 @@ namespace emulator
         #if EMULATOR_CHECK_BOUNDS
             if (address > totalSize)
                 throw EmulatorException(
-                    "Memory Address (" + std::to_string(address) + ") out of range.");
+                    "Memory Address (" + std::to_string(address) + ") out of range in Memory::operator[].");
 
             if (address < romSize)
                 throw EmulatorException(
-                    "Memory address (" + std::to_string(address) + ") in ROM can not be set.");
+                    "Memory address (" + std::to_string(address) + ") in ROM can not be set in Memory::operator[].");
         #endif
 
         return data[address];
@@ -43,11 +43,11 @@ namespace emulator
         #if EMULATOR_CHECK_BOUNDS
             if (address > totalSize)
                 throw EmulatorException(
-                    "Memory address (" + std::to_string(address) + ") out of range.");
+                    "Memory address (" + std::to_string(address) + ") out of range in Memory::set.");
 
             if (address < romSize)
                 throw EmulatorException(
-                    "Memory address (" + std::to_string(address) + ") in ROM can not be set.");
+                    "Memory address (" + std::to_string(address) + ") in ROM can not be set in Memory::set.");
         #endif
 
         data[address] = value;
@@ -58,7 +58,7 @@ namespace emulator
         #if EMULATOR_CHECK_BOUNDS
             if (address > totalSize)
                 throw EmulatorException(
-                    "Memory address (" + std::to_string(address) + ") out of range.");
+                    "Memory address (" + std::to_string(address) + ") out of range in Memory::get.");
         #endif
 
         return data[address];
@@ -69,7 +69,7 @@ namespace emulator
         #if EMULATOR_CHECK_BOUNDS
             if (address > (totalSize - 1))
                 throw EmulatorException(
-                    "Memory address (" + std::to_string(address) + ") out of range.");
+                    "Memory address (" + std::to_string(address) + ") out of range in Memory::getWord.");
         #endif
 
         return bytesAsWord(data[address + 1], data[address]);
@@ -80,7 +80,7 @@ namespace emulator
          #if EMULATOR_CHECK_BOUNDS
             if (address > (totalSize - 1))
                 throw EmulatorException(
-                    "Memory address (" + std::to_string(address) + ") out of range.");
+                    "Memory address (" + std::to_string(address) + ") out of range in Memory::setWord.");
         #endif
 
         wordAsBytePair(value, data[address + 1], data[address]);
@@ -96,7 +96,7 @@ namespace emulator
         std::ifstream file(path, std::ios::out | std::ios::binary | std::ios::ate);
 
         if (!file)
-            throw EmulatorException("Unable to open file " + path + '.');
+            throw EmulatorException("Unable to open file " + path + " in Memory::loadMemoryFromFile.");
 
         std::streamsize size = file.tellg();
 
@@ -104,7 +104,7 @@ namespace emulator
         {
             throw EmulatorException(
                 "Loading file " + path + " at offset " + std::to_string(offset) +
-                " exceeds memory bounds (" + std::to_string(totalSize) + ").");
+                " exceeds memory bounds (" + std::to_string(totalSize) + ") in Memory::loadMemoryFromFile.");
         }
 
         file.seekg(0);

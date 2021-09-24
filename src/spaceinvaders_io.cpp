@@ -38,7 +38,7 @@ namespace emulator
         if (port == 3)
             return getPort3();
 
-        throw EmulatorException("Reading from IO port " + std::to_string(port) + " not implemented.");
+        throw EmulatorException("Reading from IO port " + std::to_string(port) + " not implemented in SpaceInvadersIO::get.");
     }
 
     void SpaceInvadersIO::set(byte port, byte value)

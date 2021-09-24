@@ -1,45 +1,16 @@
 #pragma once
 
+#include "types.hpp"
+#include "screen_buffer.hpp"
+
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 #include <string>
+#include <vector>
 
-namespace emulator
+namespace console
 {
-    struct Size
-    {
-        short width, height;
-    };
-
-    struct Position
-    {
-        short x, y;
-    };
-
-    struct WindowPosition
-    {
-        short left, top, right, bottom;
-    };
-
-    enum class Color : WORD
-    {
-        Black = 0,
-        Red = FOREGROUND_RED,
-        Blue = FOREGROUND_BLUE,
-        Green = FOREGROUND_GREEN,
-        Cyan = FOREGROUND_GREEN | FOREGROUND_BLUE,
-        Magenta = FOREGROUND_RED | FOREGROUND_BLUE,
-        Yellow = FOREGROUND_RED | FOREGROUND_GREEN,
-        White = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE,
-        IntenseRed = FOREGROUND_RED | FOREGROUND_INTENSITY,
-        IntenseBlue = FOREGROUND_BLUE | FOREGROUND_INTENSITY,
-        IntenseGreen = FOREGROUND_GREEN | FOREGROUND_INTENSITY,
-        IntenseCyan = FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
-        IntenseMagenta = FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
-        IntenseYellow = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY,
-    };
-
     class Console
     {
         public:
@@ -60,20 +31,70 @@ namespace emulator
             void setTitle(const std::string& title);
             void setTitle(const std::wstring& title);
 
-            void write(const std::string& text);
-            void write(const std::wstring& text);
+            void write(const std::string& text) 
+            { 
+                getActiveScreenBuffer().write(text); 
+            }
 
-            void clear();
+            void write(const std::wstring& text) 
+            { 
+                getActiveScreenBuffer().write(text); 
+            }
 
-            void setCursorVisibility(bool visible);
-            void setCursorPosition(const short x, const short y);
-            Position getCursorPosition() const;
+            void clear() 
+            { 
+                getActiveScreenBuffer().clear(); 
+            }
 
-            WindowPosition getWindowPosition() const;
-            Size getScreenSize() const;
-            Size getBufferSize() const;
+            void setCursorVisibility(bool visible) 
+            { 
+                getActiveScreenBuffer().setCursorVisibility(visible); 
+            }
 
-            void setTextColor(const Color foreground = Color::White, const Color background = Color::Black);
+            void setCursorPosition(const short x, const short y) 
+            { 
+                getActiveScreenBuffer().setCursorPosition(x, y);
+            }
+
+            Position getCursorPosition() const 
+            {
+                return getActiveScreenBuffer().getCursorPosition(); 
+            }
+
+            WindowPosition getWindowPosition() const
+            {
+                return getActiveScreenBuffer().getWindowPosition();
+            }
+
+            void setWindowPosition(const WindowPosition& position)
+            {
+                getActiveScreenBuffer().setWindowPosition(position);
+            }
+
+            Size getScreenSize() const
+            {
+                return getActiveScreenBuffer().getScreenSize();
+            }
+
+            void setScreenSize(Size size)
+            {
+                getActiveScreenBuffer().setScreenSize(size);
+            }
+
+            Size getBufferSize() const
+            {
+                return getActiveScreenBuffer().getBufferSize();
+            }
+
+            void setBufferSize(Size size)
+            {
+                getActiveScreenBuffer().setBufferSize(size);
+            }
+
+            void setTextColor(const Color foreground = Color::White, const Color background = Color::Black)
+            {
+                return getActiveScreenBuffer().setTextColor(foreground, background);
+            }
 
             void setDirectInputMode(bool enabled);
             bool isInDirectInputMode() const { return isInDirectInputMode_; }
@@ -81,10 +102,46 @@ namespace emulator
             bool pollEvent(Event& event);
             bool waitForEvent(Event& event);
 
+            void setActiveScreenBuffer(std::size_t index);
+            void restoreDefaultScreenBuffer();
+
+            std::size_t getActiveScreenBufferIndex() const 
+            {
+                return activeBufferIndex;
+            }
+
+            ScreenBuffer& getActiveScreenBuffer()
+            {
+                return buffers[activeBufferIndex];
+            }
+
+            const ScreenBuffer& getActiveScreenBuffer() const
+            {
+                return buffers[activeBufferIndex];
+            }
+
+            ScreenBuffer& getDefaultScreenBuffer()
+            {
+                return buffers[0];
+            }
+
+            ScreenBuffer& getScreenBuffer(std::size_t index);
+            
+            std::size_t getNumberOfScreenBuffers() const
+            {
+                return buffers.size();
+            }
+
+            std::size_t createScreenBuffer();
+            void removeScreenBuffer(std::size_t index);
+            
         private:
             HANDLE inputHandle, outputHandle;
             DWORD previousInputMode, previousOutputMode;   
 
             bool isInDirectInputMode_ = true;
+
+            std::vector<ScreenBuffer> buffers;
+            std::size_t activeBufferIndex = 0;
     };
 }

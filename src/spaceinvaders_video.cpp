@@ -32,7 +32,7 @@ namespace emulator
         sf::Color foregroundColor, sf::Color backgroundColor)
     {
         if (x < 0 || (x + width) > crtWidth || y < 0 || (y + height) > crtHeight)
-            throw EmulatorException("Invalid update rectangle specified.");
+            throw EmulatorException("Invalid update rectangle specified in SpaceInvadersVideo::update.");
 
         for (unsigned short j = 0; j < height; ++j)
         {

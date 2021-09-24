@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace emulator
+namespace console
 {
     class ConsoleException
     {
