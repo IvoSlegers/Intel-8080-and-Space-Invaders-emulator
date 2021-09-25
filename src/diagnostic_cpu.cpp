@@ -15,11 +15,11 @@ namespace emulator
     {
         std::size_t machineCycles = Cpu::executeInstructionCycle();
 
-        // if (isBreakpoint(state.PC))
-        // {
-        //     halt();
-        //     return 0;
-        // }
+        if (isBreakpoint(state.PC))
+        {
+            halt();
+            return 0;
+        }
 
         return machineCycles;
     }

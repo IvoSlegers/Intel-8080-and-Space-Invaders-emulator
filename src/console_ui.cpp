@@ -206,6 +206,8 @@ namespace emulator
     {
         firstDisplayedInstructionIndex = std::max(
             0, static_cast<int>(firstDisplayedInstructionIndex) - lines);
+
+        selectedInstructionIndex = std::max(selectedInstructionIndex, firstDisplayedInstructionIndex);
     }
 
     void InstructionsDisplay::scrollDown(unsigned short lines)
@@ -218,6 +220,9 @@ namespace emulator
         firstDisplayedInstructionIndex = std::min<unsigned int>(
             displayedInstructionsCache.size() - 1,
             firstDisplayedInstructionIndex + lines);
+
+        selectedInstructionIndex = std::min<unsigned int>(selectedInstructionIndex,
+            firstDisplayedInstructionIndex + numberOfInstructionsDisplayed - 1);
     }
 
     bool InstructionsDisplay::getSelectedInstruction(Instruction& instruction)
