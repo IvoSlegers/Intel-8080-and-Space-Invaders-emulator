@@ -74,6 +74,8 @@ namespace emulator
             void executeXRA(byte value);
             void executeCMP(byte value);
 
+            void executeDAA();
+
             void executeRET();
             void executeConditionalRET(bool condition);
             void executeConditionalJMP(bool condition);

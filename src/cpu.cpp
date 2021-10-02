@@ -339,22 +339,27 @@ namespace emulator
             // DAA
             // Decimal Adjust Accumulator
             case 0x27:
-                if ((state.A & 0x0F) > 9 || state.CA)
-                {
-                    state.A += 6;
-                    state.CA = 1;
-                }
-                else
-                    state.CA = 0;
+                executeDAA();
+                break;
 
-                if ((state.A & 0xFA) > (9 << 4) || state.CY)
-                {
-                    state.A += (6 << 4);
-                    state.CY = 1;
-                }
-                // Note: the carry bit is not reset in this case.
-                setZSPFlags(state.A);
-                executedMachineCycles += 4;
+
+                // if ((state.A & 0x0F) > 9 || state.CA)
+                // {
+                //     state.CA = (state.A & 0x0F) > 9;
+                //     state.A += 6;
+                // }
+
+                // if ((state.A & 0xF0) > (9 << 4) || state.CY)
+                // {
+                //     // If a overflow does not occur in the second step the carry bit is unaffected.
+                //     if ((state.A & 0xFA) > (9 << 4))
+                //         state.CY = 1;
+
+                //     state.A += (6 << 4);
+                // }
+
+                //setZSPFlags(state.A);
+                //executedMachineCycles += 4;
                 break;
 
             // STC
@@ -375,7 +380,6 @@ namespace emulator
             // DE
             case 0x19:
                 executeDAD(state.getDE());
-                executedMachineCycles += 10;
                 break;
 
             // HL
@@ -584,17 +588,17 @@ namespace emulator
 
             case 0x46: // M to B
                 state.B = memory.get(state.getHL());
-                executedMachineCycles += 5;
+                executedMachineCycles += 7;
                 break;
 
             case 0x56: // M to D
                 state.D = memory.get(state.getHL());
-                executedMachineCycles += 5;
+                executedMachineCycles += 7;
                 break;
 
             case 0x66: // M to H
                 state.H = memory.get(state.getHL());
-                executedMachineCycles += 5;
+                executedMachineCycles += 7;
                 break;
 
             case 0x76: // HLT
@@ -741,17 +745,17 @@ namespace emulator
 
             case 0x4E: // M to C
                 state.C = memory.get(state.getHL());
-                executedMachineCycles += 5;
+                executedMachineCycles += 7;
                 break;
 
             case 0x5E: // M to E
                 state.E = memory.get(state.getHL());
-                executedMachineCycles += 5;
+                executedMachineCycles += 7;
                 break;
 
             case 0x6E: // M to L
                 state.L = memory.get(state.getHL());
-                executedMachineCycles += 5;
+                executedMachineCycles += 7;
                 break;
 
             case 0x7E: // M to A
@@ -775,7 +779,7 @@ namespace emulator
                 break;
 
             case 0x7F: // A to A
-                executedMachineCycles += 7;
+                executedMachineCycles += 5;
                 break;
 
             // ADD
@@ -958,7 +962,7 @@ namespace emulator
                 executeADD(state.A, state.CY);
                 break;
 
-            // SBC (Subtract with carry)
+            // SBB (Subtract with borrow)
             // Subtract value of specified register or memory plus the carry bit from the contents of the accumulator
 
             case 0x98:
@@ -1391,7 +1395,7 @@ namespace emulator
             case 0xEB:
                 std::swap(state.H, state.D);
                 std::swap(state.L, state.E);
-                executedMachineCycles += 5;
+                executedMachineCycles += 4;
                 break;
 
             // EI 
@@ -1532,15 +1536,14 @@ namespace emulator
 
     void Cpu::executeSUB(byte value, byte carry)
     {
-        // According to the manual, the carry bit is handled by adding it to the value 
-        // that will be subtracted first.
-        value += carry;
+        state.CY = value + carry> state.A; // the carry flag is set when a borrow occurs.
 
-        state.CY = value > state.A; // the carry flag is set when a borrow occurs.
         // The auxiliary carry indicates whether there was an overflow in the addition of the last four bits only.
         // The subtraction is performed using 2's complement representation of the second factor.
-        state.CA = ((state.A & 0x0F) + ((~value + 1) & 0x0F)) > 0x0F;
-        state.A -= value;
+        // Note that the 2's complement of value is ~value + 1. The +1 is handled by setting the carry bit to 1.
+        // The effect of the carry bit being added to value is equivalent to not adding +1 in the 2's complement representation.
+        state.CA = ((state.A & 0x0F) + ((~value) & 0x0F) + !carry) > 0x0F;
+        state.A -= value + carry;
         setZSPFlags(state.A);
 
         executedMachineCycles += 4;
@@ -1581,11 +1584,44 @@ namespace emulator
         state.CY = value > state.A; // the carry flag is set when a borrow occurs.
 
         // See executeSUB
-        state.CA = ((state.A & 0x0F) + ((~value + 1) & 0x0F)) > 0x0F;
+        state.CA = ((state.A & 0x0F) + ((~value) & 0x0F) + 1) > 0x0F;
 
         setZSPFlags(state.A - value);
 
         executedMachineCycles += 4;
+    }
+
+    void Cpu::executeDAA()
+    {
+        // The information given about the DAA instruction in the intel 8080 manual is
+        // not entirely correct. It suggests that the addition of 6 on the lower 4 bits
+        // and higher 4 bits is done separately. 
+        // However at http://www.righto.com/2013/08/reverse-engineering-8085s-decimal.html
+        // it is stated that the addition is done once with value 0x00, 0x06, 0x60 or 0x66.
+        byte correction = 0;
+
+        // Add 6 to the lower 4 bits if they are greater or equal to 10 or the CA flag is set.
+        if ((state.A & 0x0F) >= 0x0A || state.CA)
+            correction += 0x06;
+
+        bool CY = state.CY;
+
+        // Add 6 to the upper 4 bits if they are greater or equal to 10 or the CA flag is set.
+        // Note, this should act as if decided after the correction of the lower 4 bits occured.
+        // Hence, a correction should also happen if there is a overflow of 1 from the lower 4 bits
+        // and the higher 4 bits are equal to 9.
+        if ((state.A & 0xF0) >= 0xA0 || 
+            ((state.A & 0xF0) == 0x90 && ((state.A & 0x0F) >= 0x0A)) ||
+            state.CY)
+        {
+            correction += 0x60;
+            CY = true;                    
+        }
+
+        executeADD(correction);
+
+        // If no carry out at the highest 4 bits occurs the CY flag is unaffected (rather than reset).
+        state.CY = CY;
     }
 
     void Cpu::executeRET()
