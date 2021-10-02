@@ -49,8 +49,8 @@ int main(int argc, const char* argv[])
 
     try
     {
-        //emulator::SpaceInvadersApplication app;
-        emulator::DiagnosticApplication app;
+        emulator::SpaceInvadersApplication app;
+        //emulator::DiagnosticApplication app;
         app.run();
     }
     catch (const console::ConsoleException& exception)

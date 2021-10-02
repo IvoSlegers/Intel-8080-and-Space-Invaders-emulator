@@ -24,11 +24,9 @@ namespace emulator
 
             void reset();
             void quit();
-            void executeSingleStep();
-            void toggleBreakpoint(word address);
 
         private:
-            void onConsoleEvent(const Console::Event& event);
+            //void onConsoleEvent(const Console::Event& event);
             void onEvent(const sf::Event& event);
 
             void handleEvents();
@@ -40,21 +38,15 @@ namespace emulator
             DiagnosticCpu cpu;
 
             sf::RenderWindow window;
-            Console console;
+            //Console console;
 
-            ConsoleUI consoleUI;
+            //ConsoleUI consoleUI;
             SpaceInvadersVideo video;
 
             int machineCyclesToBeExecuted = 0;
             sf::Clock screenTimer;
             bool upperHalf = true;
 
-            bool running = false;
-            void triggerBreakpoint();
-
-            std::set<word> breakpoints;
-
-            friend ConsoleUI;
-            friend InstructionsDisplay;
+            //bool running = false;
     };
 } // namespace emulator

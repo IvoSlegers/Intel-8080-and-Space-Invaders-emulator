@@ -24,9 +24,9 @@ namespace emulator
 
     void DiagnosticApplication::run()
     {
-        //runDiagnostic("cpu_diagnostics/TST8080.COM");
-        //runDiagnostic("cpu_diagnostics/CPUTEST.COM");
-        //runDiagnostic("cpu_diagnostics/8080PRE.COM");
+        runDiagnostic("cpu_diagnostics/TST8080.COM");
+        runDiagnostic("cpu_diagnostics/CPUTEST.COM");
+        runDiagnostic("cpu_diagnostics/8080PRE.COM");
         runDiagnostic("cpu_diagnostics/8080EXM.COM");
 
         runningAutonomously = false;

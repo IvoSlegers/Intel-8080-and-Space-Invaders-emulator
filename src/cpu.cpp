@@ -342,26 +342,6 @@ namespace emulator
                 executeDAA();
                 break;
 
-
-                // if ((state.A & 0x0F) > 9 || state.CA)
-                // {
-                //     state.CA = (state.A & 0x0F) > 9;
-                //     state.A += 6;
-                // }
-
-                // if ((state.A & 0xF0) > (9 << 4) || state.CY)
-                // {
-                //     // If a overflow does not occur in the second step the carry bit is unaffected.
-                //     if ((state.A & 0xFA) > (9 << 4))
-                //         state.CY = 1;
-
-                //     state.A += (6 << 4);
-                // }
-
-                //setZSPFlags(state.A);
-                //executedMachineCycles += 4;
-                break;
-
             // STC
             // Set carry to 1
             case 0x37:

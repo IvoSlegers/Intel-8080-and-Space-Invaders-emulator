@@ -5,18 +5,18 @@
 namespace emulator
 {
     SpaceInvadersApplication::SpaceInvadersApplication(): memory(0x2000, 0x2000), io(), cpu(memory, io),
-        window(sf::VideoMode(800, 600), "intel 8080 - Space Invaders"), console(),
-        consoleUI(console, cpu, memory), video(window, memory)
+        window(sf::VideoMode(800, 600), "intel 8080 - Space Invaders"), //console(),
+        /* consoleUI(console, cpu, memory),*/ video(window, memory)
     {}
 
     void SpaceInvadersApplication::run()
     {
         memory.loadMemoryFromFile("invaders.rom");
-        consoleUI.signalMemoryChanged();
+        //consoleUI.signalMemoryChanged();
 
         window.setFramerateLimit(60);
 
-        consoleUI.draw();
+        //consoleUI.draw();
         
         sf::Clock frametimeClock;
         while (window.isOpen())
@@ -35,7 +35,7 @@ namespace emulator
     void SpaceInvadersApplication::reset()
     {
         cpu.reset();
-        consoleUI.draw();
+        //consoleUI.draw();
     }
 
     void SpaceInvadersApplication::quit()
@@ -43,32 +43,21 @@ namespace emulator
         window.close();
     }
 
-    void SpaceInvadersApplication::executeSingleStep()
-    {
-        cpu.executeInstructionCycle();
-        consoleUI.draw();
-    }
+    // void SpaceInvadersApplication::onConsoleEvent(const Console::Event& event)
+    // {
+    //     if (event.isDirectInput && event.keyEvent.wVirtualKeyCode == VK_ESCAPE)
+    //         window.close();
 
-    void SpaceInvadersApplication::toggleBreakpoint(word address)
-    {
-         
-    }
-
-    void SpaceInvadersApplication::onConsoleEvent(const Console::Event& event)
-    {
-        if (event.isDirectInput && event.keyEvent.wVirtualKeyCode == VK_ESCAPE)
-            window.close();
-
-        consoleUI.onConsoleEvent(event);
-    }
+    //     consoleUI.onConsoleEvent(event);
+    // }
 
     void SpaceInvadersApplication::onEvent(const sf::Event& event)
     {
         if (event.type == sf::Event::Closed)
-             window.close();
+            quit();
 
-        if (event.type == sf::Event::KeyPressed || event.key.code == sf::Keyboard::Escape)
-            window.close();
+        if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
+            quit();
 
         // if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Q)
         //     window.close();
@@ -86,9 +75,9 @@ namespace emulator
         while (window.pollEvent(event))
             onEvent(event);
 
-        Console::Event consoleEvent;
-        while (console.pollEvent(consoleEvent))
-            onConsoleEvent(consoleEvent);
+        // Console::Event consoleEvent;
+        // while (console.pollEvent(consoleEvent))
+        //     onConsoleEvent(consoleEvent);
     }
 
     void SpaceInvadersApplication::update(float delta)
@@ -119,39 +108,25 @@ namespace emulator
         //     upperHalf = !upperHalf;
         // }
 
-        if (false)
+        machineCyclesToBeExecuted = 2'000'000/120 + 1;
+        while (machineCyclesToBeExecuted > 0)
         {
-            machineCyclesToBeExecuted = 2'000'000/120;
-            while (machineCyclesToBeExecuted > 0 && running)
-            {
-                machineCyclesToBeExecuted -= cpu.executeInstructionCycle();
-                if (breakpoints.count(cpu.getState().PC) != 0)
-                {
-                    triggerBreakpoint();
-                    return;
-                }                    
-            }
+            machineCyclesToBeExecuted -= cpu.executeInstructionCycle();                
+        }
 
-            video.update(0, 0, SpaceInvadersVideo::crtWidth, SpaceInvadersVideo::crtHeight/2,
-            sf::Color::White, sf::Color::Black);
-            cpu.issueRSTInterrupt(Cpu::RestartInstructions::RST1);
+        video.update(0, 0, SpaceInvadersVideo::crtWidth, SpaceInvadersVideo::crtHeight/2,
+        sf::Color::White, sf::Color::Black);
+        cpu.issueRSTInterrupt(Cpu::RestartInstructions::RST1);
 
-            machineCyclesToBeExecuted = 2'000'000/120;
-            while (machineCyclesToBeExecuted > 0 && running)
-            {
-                machineCyclesToBeExecuted -= cpu.executeInstructionCycle();
-                if (breakpoints.count(cpu.getState().PC) != 0)
-                {
-                    triggerBreakpoint();
-                    return;
-                }
-                    
-            }
+        machineCyclesToBeExecuted = 2'000'000/120 + 1;
+        while (machineCyclesToBeExecuted > 0)
+        {
+            machineCyclesToBeExecuted -= cpu.executeInstructionCycle();                
+        }
 
-            video.update(0, SpaceInvadersVideo::crtHeight/2, SpaceInvadersVideo::crtWidth,
-                SpaceInvadersVideo::crtHeight/2, sf::Color::White, sf::Color::Black);
-            cpu.issueRSTInterrupt(Cpu::RestartInstructions::RST2);
-        }        
+        video.update(0, SpaceInvadersVideo::crtHeight/2, SpaceInvadersVideo::crtWidth,
+            SpaceInvadersVideo::crtHeight/2, sf::Color::White, sf::Color::Black);
+        cpu.issueRSTInterrupt(Cpu::RestartInstructions::RST2);    
     }
 
     void SpaceInvadersApplication::draw()
@@ -162,11 +137,4 @@ namespace emulator
 
         window.display();
     }
-
-    void SpaceInvadersApplication::triggerBreakpoint()
-    {
-        consoleUI.draw();
-        running = false;
-    }
-
 } // namespace emulator
