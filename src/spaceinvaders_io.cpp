@@ -125,7 +125,7 @@ namespace emulator
         bool onePlayerLeft = sf::Keyboard::isKeyPressed(keyMapping.at("1 Player Left"));
         bool onePlayerRight = sf::Keyboard::isKeyPressed(keyMapping.at("1 Player Right"));
 
-        return 0b0000'0100 | coinInserted | (twoPlayerStart << 1) | (onePlayerStart << 2) |
+        return 0b0000'1000 | coinInserted | (twoPlayerStart << 1) | (onePlayerStart << 2) |
             (onePlayerFire << 4) | (onePlayerLeft << 5) | (onePlayerRight << 6);
     }
 
