@@ -15,8 +15,8 @@ namespace emulator
 
         sprite.setTexture(texture);
 
-        sprite.setPosition(50, 50 + 2 * crtWidth);
-        sprite.setScale(sf::Vector2f(2,2));
+        sprite.setPosition(50, 50 + scalingFactor * crtWidth);
+        sprite.setScale(sf::Vector2f(scalingFactor, scalingFactor));
         sprite.setRotation(-90.f);
 
         videoData = std::make_unique<byte[]>(static_cast<std::size_t>(4 * crtWidth * crtHeight));
@@ -24,7 +24,7 @@ namespace emulator
         outline.setOutlineColor(sf::Color::White);
         outline.setOutlineThickness(1.0f);
         outline.setPosition(sf::Vector2f(49, 49));
-        outline.setSize(sf::Vector2f(2 * crtHeight + 2, 2 * crtWidth + 2));
+        outline.setSize(sf::Vector2f(scalingFactor * crtHeight + 2, scalingFactor * crtWidth + 2));
     }
 
     void SpaceInvadersVideo::update(unsigned short x, unsigned short y, 

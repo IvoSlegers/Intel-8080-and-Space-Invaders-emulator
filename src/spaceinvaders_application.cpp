@@ -5,7 +5,7 @@
 namespace emulator
 {
     SpaceInvadersApplication::SpaceInvadersApplication(): memory(0x2000, 0x2000), io(), cpu(memory, io),
-        window(sf::VideoMode(800, 600), "intel 8080 - Space Invaders"), //console(),
+        window(sf::VideoMode(SpaceInvadersVideo::crtHeight * SpaceInvadersVideo::scalingFactor + 100, SpaceInvadersVideo::crtWidth * SpaceInvadersVideo::scalingFactor + 100), "intel 8080 - Space Invaders"), //console(),
         /* consoleUI(console, cpu, memory),*/ video(window, memory)
     {}
 
@@ -14,7 +14,7 @@ namespace emulator
         memory.loadMemoryFromFile("invaders.rom");
         //consoleUI.signalMemoryChanged();
 
-        window.setFramerateLimit(60);
+        window.setFramerateLimit(240);
 
         //consoleUI.draw();
         
@@ -82,51 +82,51 @@ namespace emulator
 
     void SpaceInvadersApplication::update(float delta)
     {
-        // machineCyclesToBeExecuted += delta * 2'000'000;
+        machineCyclesToBeExecuted += delta * 2'000'000;
 
+        while (machineCyclesToBeExecuted > 0)
+        {
+            machineCyclesToBeExecuted -= cpu.executeInstructionCycle();
+        }
+
+        if (screenTimer.getElapsedTime().asSeconds() > 1/120.0f)
+        {
+            if (upperHalf)
+            {
+                video.update(0, 0, SpaceInvadersVideo::crtWidth, SpaceInvadersVideo::crtHeight/2,
+                sf::Color::White, sf::Color::Black);
+                cpu.issueRSTInterrupt(Cpu::RestartInstructions::RST1);
+            }
+            else
+            {
+                video.update(0, SpaceInvadersVideo::crtHeight/2, SpaceInvadersVideo::crtWidth,
+                    SpaceInvadersVideo::crtHeight/2, sf::Color::White, sf::Color::Black);
+                cpu.issueRSTInterrupt(Cpu::RestartInstructions::RST2);
+            }
+
+            screenTimer.restart();
+            upperHalf = !upperHalf;
+        }
+
+        // machineCyclesToBeExecuted = 2'000'000/120 + 1;
         // while (machineCyclesToBeExecuted > 0)
         // {
-        //     machineCyclesToBeExecuted -= cpu.executeInstructionCycle();
+        //     machineCyclesToBeExecuted -= cpu.executeInstructionCycle();                
         // }
 
-        // if (screenTimer.getElapsedTime().asSeconds() > 1/120.0f)
+        // video.update(0, 0, SpaceInvadersVideo::crtWidth, SpaceInvadersVideo::crtHeight/2,
+        // sf::Color::White, sf::Color::Black);
+        // cpu.issueRSTInterrupt(Cpu::RestartInstructions::RST1);
+
+        // machineCyclesToBeExecuted = 2'000'000/120 + 1;
+        // while (machineCyclesToBeExecuted > 0)
         // {
-        //     if (upperHalf)
-        //     {
-        //         video.update(0, 0, SpaceInvadersVideo::crtWidth, SpaceInvadersVideo::crtHeight/2,
-        //         sf::Color::White, sf::Color::Black);
-        //         cpu.issueRSTInterrupt(Cpu::RestartInstructions::RST1);
-        //     }
-        //     else
-        //     {
-        //         video.update(0, SpaceInvadersVideo::crtHeight/2, SpaceInvadersVideo::crtWidth,
-        //             SpaceInvadersVideo::crtHeight/2, sf::Color::White, sf::Color::Black);
-        //         cpu.issueRSTInterrupt(Cpu::RestartInstructions::RST2);
-        //     }
-
-        //     screenTimer.restart();
-        //     upperHalf = !upperHalf;
+        //     machineCyclesToBeExecuted -= cpu.executeInstructionCycle();                
         // }
 
-        machineCyclesToBeExecuted = 2'000'000/120 + 1;
-        while (machineCyclesToBeExecuted > 0)
-        {
-            machineCyclesToBeExecuted -= cpu.executeInstructionCycle();                
-        }
-
-        video.update(0, 0, SpaceInvadersVideo::crtWidth, SpaceInvadersVideo::crtHeight/2,
-        sf::Color::White, sf::Color::Black);
-        cpu.issueRSTInterrupt(Cpu::RestartInstructions::RST1);
-
-        machineCyclesToBeExecuted = 2'000'000/120 + 1;
-        while (machineCyclesToBeExecuted > 0)
-        {
-            machineCyclesToBeExecuted -= cpu.executeInstructionCycle();                
-        }
-
-        video.update(0, SpaceInvadersVideo::crtHeight/2, SpaceInvadersVideo::crtWidth,
-            SpaceInvadersVideo::crtHeight/2, sf::Color::White, sf::Color::Black);
-        cpu.issueRSTInterrupt(Cpu::RestartInstructions::RST2);    
+        // video.update(0, SpaceInvadersVideo::crtHeight/2, SpaceInvadersVideo::crtWidth,
+        //     SpaceInvadersVideo::crtHeight/2, sf::Color::White, sf::Color::Black);
+        // cpu.issueRSTInterrupt(Cpu::RestartInstructions::RST2);    
     }
 
     void SpaceInvadersApplication::draw()

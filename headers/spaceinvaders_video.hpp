@@ -23,6 +23,9 @@ namespace emulator
             static constexpr unsigned short crtWidth = 256;
             static constexpr unsigned short crtHeight = 224;
 
+            // We scale the 256x244 resolution up by scalingFactor
+            static constexpr float scalingFactor = 3;
+
             // The video buffer is located at addresses 2400 - 3FFF
             static constexpr unsigned short videoBufferAddress = 0x2400;
         private:
