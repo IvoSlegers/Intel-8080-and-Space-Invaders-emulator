@@ -12,13 +12,20 @@ namespace emulator
         keyMapping["2 Players Start"] = sf::Keyboard::Num2;
         keyMapping["1 Player Start"] = sf::Keyboard::Num1;
 
-        keyMapping["1 Player Fire"] = sf::Keyboard::O;
-        keyMapping["1 Player Left"] = sf::Keyboard::K;
-        keyMapping["1 Player Right"] = sf::Keyboard::L;
+        keyMapping["1 Player Fire"] = sf::Keyboard::Space;
+        keyMapping["1 Player Left"] = sf::Keyboard::Left;
+        keyMapping["1 Player Right"] = sf::Keyboard::Right;
 
-        keyMapping["2 Player Fire"] = sf::Keyboard::U;
-        keyMapping["2 Player Left"] = sf::Keyboard::H;
-        keyMapping["2 Player Right"] = sf::Keyboard::J;
+        keyMapping["2 Player Fire"] = sf::Keyboard::LControl;
+        keyMapping["2 Player Left"] = sf::Keyboard::A;
+        keyMapping["2 Player Right"] = sf::Keyboard::D;
+
+        if (shotSoundBuffer.loadFromFile("sounds/shot.wav"))
+        {
+            shotSound.setBuffer(shotSoundBuffer);
+            shotSound.setVolume(20);
+            shotSound.setLoop(false);
+        }
     }
 
     SpaceInvadersIO::~SpaceInvadersIO()
@@ -159,6 +166,11 @@ namespace emulator
         /*
         Port 3 is used for audio output. Currently not implemented.
         */
+
+       if (value & (1<<1) && shotSound.getStatus() != sf::Sound::Playing)
+       {
+           shotSound.play();
+       }
 
         return;
     }

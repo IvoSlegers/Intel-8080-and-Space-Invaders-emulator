@@ -4,3 +4,4 @@
 *.ttf
 *.o
 cpu_diagnostics/*
+*.wav

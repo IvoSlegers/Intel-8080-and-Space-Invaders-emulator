@@ -24,11 +24,13 @@ debug : link_options += -lsfml-main-d
 debug : link_options += -lsfml-graphics-d
 debug : link_options += -lsfml-system-d
 debug : link_options += -lsfml-window-d
+debug : link_options += -lsfml-audio-d
 
 release : link_options += -lsfml-main
 release : link_options += -lsfml-graphics
 release : link_options += -lsfml-system
 release : link_options += -lsfml-window
+release : link_options += -lsfml-audio-d
 
 # specify the name of the output executable
 debug : output_file = application_debug

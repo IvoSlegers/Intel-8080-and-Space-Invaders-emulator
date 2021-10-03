@@ -6,6 +6,7 @@
 #include <map>
 
 #include <SFML/Window/Keyboard.hpp>
+#include <SFML/Audio.hpp>
 
 namespace emulator
 {
@@ -36,5 +37,8 @@ namespace emulator
 
             word shiftRegister = 0;
             byte offset = 0;
+
+            sf::SoundBuffer shotSoundBuffer;
+            sf::Sound shotSound;
     };
 } // namespace emulator

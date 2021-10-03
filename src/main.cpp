@@ -19,17 +19,15 @@
 // - Using a set for breakpoints is potentially slow, replace by large bool array?
 // - Remove all the 'executed machine cycles += 5' with a table lookup
 // - Make the switch statement nicer (see supersazu's emulator)
-// - Implement a buffer system for the console so we can write a separate log messages page
-// - Or... pipe any output from diagnostics into a file?
 // - Implement a run until end function for cpu diagnostics application
 // - implement move, view, breakpoint commands
 // - Make classes that need to be non-copyable
 // - Look at unique_ptr to see how a move-only class should be implemented.
 // - Properly implement a executed instructions log (move run until halt & logging into consoleUI)
 // - Implement cyc checking?
-// - re-enable check bounds
-
-// - GOAL: make emulator compliant
+// - Implement a space invaders debug version
+// - Implement color overlay (see https://github.com/howprice/invaders-emulator/blob/master/src/machine.cpp)
+// - A solution to the sound looping issue could be to only play a sound if it is now played the previous time the out port is written
 
 #if EMULATOR_LOG_SFML_ERRORS
     #include <SFML/System.hpp>
