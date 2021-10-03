@@ -1461,9 +1461,12 @@ namespace emulator
 
         if (state.interruptsEnabled)
         {
-            state.halted = false;
             executeRST(address);
 
+            state.halted = false;
+            state.interruptsEnabled = false;
+
+            executedMachineCycles += 11;
             return 11;
         }
         else
