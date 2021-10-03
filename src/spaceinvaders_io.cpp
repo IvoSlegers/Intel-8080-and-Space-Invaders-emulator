@@ -26,24 +26,52 @@ namespace emulator
 
     byte SpaceInvadersIO::get(byte port) const
     {
-        if (port == 0)
-            return getPort0();
+        switch (port)
+        {
+            case 0:
+                return getPort0();
+            
+            case 1:
+                return getPort1();
 
-        if (port == 1)
-            return getPort1();
+            case 2:
+                return getPort2();
 
-        if (port == 2)
-            return getPort2();
+            case 3:
+                return getPort3();
 
-        if (port == 3)
-            return getPort3();
-
-        throw EmulatorException("Reading from IO port " + std::to_string(port) + " not implemented in SpaceInvadersIO::get.");
+            default:
+                throw EmulatorException("Reading from IO port " + std::to_string(port) + " not implemented in SpaceInvadersIO::get.");
+        }       
     }
 
     void SpaceInvadersIO::set(byte port, byte value)
     {
-        return;
+        switch (port)
+        {
+            case 2:
+                setPort2(value);
+                return;
+                
+            case 3:
+                setPort3(value);
+                return;
+
+            case 4:
+                setPort4(value);
+                return;
+
+            case 5:
+                setPort5(value);
+                return;
+
+            case 6:
+                setPort6(value);
+                return;
+
+            default:
+                throw EmulatorException("Writing to IO port " + std::to_string(port) + " not implemented in SpaceInvadersIO::set.");
+        }
     }
 
     byte SpaceInvadersIO::getPort0() const
