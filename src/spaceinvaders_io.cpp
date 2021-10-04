@@ -1,7 +1,51 @@
 #include "spaceinvaders_io.hpp"
 
+#include <string>
+
 namespace emulator
 {
+    namespace
+    {
+        enum Sounds
+        {
+            Ufo = 0,
+            Shot,
+            Flash,
+            InvaderDie,
+            FleetMovement1,
+            FleetMovement2,
+            FleetMovement3,
+            FleetMovement4,
+            UfoHit     
+        };
+
+        static const byte soundMasks[SpaceInvadersIO::numberOfSounds] = 
+        {
+            0x01,
+            0x02,
+            0x04,
+            0x08,
+            0x01,
+            0x02,
+            0x04,
+            0x08,
+            0x10 
+        };
+
+        static const std::string soundFileNames[SpaceInvadersIO::numberOfSounds] = 
+        {
+            "sounds/ufo.wav",
+            "sounds/shot.wav",
+            "sounds/flash.wav",
+            "sounds/invader_die.wav",
+            "sounds/fleet_movement_1.wav",
+            "sounds/fleet_movement_2.wav",
+            "sounds/fleet_movement_3.wav",
+            "sounds/fleet_movement_4.wav",
+            "sounds/ufo_hit.wav"
+        };
+    }
+
     SpaceInvadersIO::SpaceInvadersIO()
     {
         keyMapping["Fire"] = sf::Keyboard::Space;
@@ -20,11 +64,13 @@ namespace emulator
         keyMapping["2 Player Left"] = sf::Keyboard::A;
         keyMapping["2 Player Right"] = sf::Keyboard::D;
 
-        if (shotSoundBuffer.loadFromFile("sounds/shot.wav"))
+        for (std::size_t i = 0; i < SpaceInvadersIO::numberOfSounds; ++i)
         {
-            shotSound.setBuffer(shotSoundBuffer);
-            shotSound.setVolume(20);
-            shotSound.setLoop(false);
+            sounds[i].setVolume(soundVolume);
+            sounds[i].setLoop(false);
+
+            if (soundBuffers[i].loadFromFile(soundFileNames[i]))
+                sounds[i].setBuffer(soundBuffers[i]);
         }
     }
 
@@ -153,7 +199,7 @@ namespace emulator
 
     byte SpaceInvadersIO::getPort3() const
     {
-        return (shiftRegister >> (8 - offset)) & 0x0F;
+        return (shiftRegister >> (8 - offset));
     }
 
     void SpaceInvadersIO::setPort2(byte value)
@@ -163,14 +209,15 @@ namespace emulator
 
     void SpaceInvadersIO::setPort3(byte value)
     {
-        /*
-        Port 3 is used for audio output. Currently not implemented.
-        */
+        if ((value & soundMasks[Sounds::Ufo]) != 0 && 
+            sounds[Sounds::Ufo].getStatus() != sf::Sound::Playing)
+        {
+            sounds[Sounds::Ufo].play();
+        }
 
-       if (value & (1<<1) && shotSound.getStatus() != sf::Sound::Playing)
-       {
-           shotSound.play();
-       }
+        handleNonrepeatingSounds(value, previousPort3Input, 1, 3);
+
+        previousPort3Input = value;
 
         return;
     }
@@ -182,10 +229,8 @@ namespace emulator
 
     void SpaceInvadersIO::setPort5(byte value)
     {
-        /*
-        Port 5 is used for audio output. Currently not implemented.
-        */
-
+        handleNonrepeatingSounds(value, previousPort5Input, 4, 5);
+        previousPort5Input = value;
         return;
     }
 
@@ -197,4 +242,17 @@ namespace emulator
 
         return;
     }    
+
+    void SpaceInvadersIO::handleNonrepeatingSounds(byte value, byte previousValue, std::size_t first, std::size_t number)
+    {
+        for (std::size_t i = first; i < first + number; ++i)
+        {
+            if ((value & soundMasks[i]) != 0 && 
+                (previousValue & soundMasks[i]) == 0 && 
+                sounds[i].getStatus() != sf::Sound::Playing)
+            {
+                sounds[i].play();
+            }
+        }
+    }
 } // namespace emulator

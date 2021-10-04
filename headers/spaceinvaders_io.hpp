@@ -21,6 +21,9 @@ namespace emulator
 
             static constexpr bool dip3 = false, dip4 = false, dip5 = false, dip6 = false, dip7 = false;
 
+            static constexpr std::size_t numberOfSounds = 9;
+            static constexpr float soundVolume = 20;
+
         private:
             byte getPort0() const;
             byte getPort1() const;
@@ -33,12 +36,17 @@ namespace emulator
             void setPort5(byte value);
             void setPort6(byte value);
 
+            void handleNonrepeatingSounds(byte value, byte previousValue, std::size_t first, std::size_t number);
+
             std::map<std::string, sf::Keyboard::Key> keyMapping;
 
             word shiftRegister = 0;
             byte offset = 0;
 
-            sf::SoundBuffer shotSoundBuffer;
-            sf::Sound shotSound;
+            sf::SoundBuffer soundBuffers[numberOfSounds];
+            sf::Sound sounds[numberOfSounds];
+
+            byte previousPort3Input = 0;
+            byte previousPort5Input = 0;
     };
 } // namespace emulator
