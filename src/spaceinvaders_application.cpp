@@ -5,18 +5,16 @@
 namespace emulator
 {
     SpaceInvadersApplication::SpaceInvadersApplication(): memory(0x2000, 0x2000), io(), cpu(memory, io),
-        window(sf::VideoMode(SpaceInvadersVideo::crtHeight * SpaceInvadersVideo::scalingFactor + 100, SpaceInvadersVideo::crtWidth * SpaceInvadersVideo::scalingFactor + 100), "intel 8080 - Space Invaders"), //console(),
-        /* consoleUI(console, cpu, memory),*/ video(window, memory)
+        window(sf::VideoMode(SpaceInvadersVideo::optimalWindowWidth, SpaceInvadersVideo::optimalWindowHeight), 
+                "intel 8080 - Space Invaders"),
+        video(window, memory)
     {}
 
     void SpaceInvadersApplication::run()
     {
         memory.loadMemoryFromFile("invaders.rom");
-        //consoleUI.notifyMemoryChanged();
 
         window.setFramerateLimit(240);
-
-        //consoleUI.draw();
         
         sf::Clock frametimeClock;
         while (window.isOpen())
@@ -35,21 +33,12 @@ namespace emulator
     void SpaceInvadersApplication::reset()
     {
         cpu.reset();
-        //consoleUI.draw();
     }
 
     void SpaceInvadersApplication::quit()
     {
         window.close();
     }
-
-    // void SpaceInvadersApplication::onConsoleEvent(const Console::Event& event)
-    // {
-    //     if (event.isDirectInput && event.keyEvent.wVirtualKeyCode == VK_ESCAPE)
-    //         window.close();
-
-    //     consoleUI.onConsoleEvent(event);
-    // }
 
     void SpaceInvadersApplication::onEvent(const sf::Event& event)
     {
@@ -58,15 +47,6 @@ namespace emulator
 
         if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
             quit();
-
-        // if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Q)
-        //     window.close();
-
-        // if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::S)
-        // {
-        //     cpu.executeInstructionCycle();
-        //     consoleUI.draw();
-        // }
     }
 
     void SpaceInvadersApplication::handleEvents()
@@ -74,14 +54,11 @@ namespace emulator
         sf::Event event;
         while (window.pollEvent(event))
             onEvent(event);
-
-        // Console::Event consoleEvent;
-        // while (console.pollEvent(consoleEvent))
-        //     onConsoleEvent(consoleEvent);
     }
 
     void SpaceInvadersApplication::update(float delta)
     {
+        // By default the intel 8080 processor runs at 2 MHz.
         machineCyclesToBeExecuted += delta * 2'000'000;
 
         while (machineCyclesToBeExecuted > 0)
@@ -89,44 +66,32 @@ namespace emulator
             machineCyclesToBeExecuted -= cpu.executeInstructionCycle();
         }
 
+        // The CRT in the space invaders cabinet had a refresh rate of 60Hz.
+        // Hence the frequency of either a RST1 or RST2 happing is 120Hz.
         if (screenTimer.getElapsedTime().asSeconds() > 1/120.0f)
         {
             if (upperHalf)
             {
                 video.update(0, 0, SpaceInvadersVideo::crtWidth, SpaceInvadersVideo::crtHeight/2,
                 sf::Color::White, sf::Color::Black);
+
+                // The Space Invaders cabinet issues a RST1 interrupt each time the top half of the
+                // screen is drawn by the CRT.
                 cpu.issueRSTInterrupt(Cpu::RestartInstructions::RST1);
             }
             else
             {
                 video.update(0, SpaceInvadersVideo::crtHeight/2, SpaceInvadersVideo::crtWidth,
                     SpaceInvadersVideo::crtHeight/2, sf::Color::White, sf::Color::Black);
+
+                // The Space Invaders cabinet issues a RST2 interrupt each time the bottom half of the 
+                // screen is drawn by the CRT.
                 cpu.issueRSTInterrupt(Cpu::RestartInstructions::RST2);
             }
 
             screenTimer.restart();
             upperHalf = !upperHalf;
         }
-
-        // machineCyclesToBeExecuted = 2'000'000/120 + 1;
-        // while (machineCyclesToBeExecuted > 0)
-        // {
-        //     machineCyclesToBeExecuted -= cpu.executeInstructionCycle();                
-        // }
-
-        // video.update(0, 0, SpaceInvadersVideo::crtWidth, SpaceInvadersVideo::crtHeight/2,
-        // sf::Color::White, sf::Color::Black);
-        // cpu.issueRSTInterrupt(Cpu::RestartInstructions::RST1);
-
-        // machineCyclesToBeExecuted = 2'000'000/120 + 1;
-        // while (machineCyclesToBeExecuted > 0)
-        // {
-        //     machineCyclesToBeExecuted -= cpu.executeInstructionCycle();                
-        // }
-
-        // video.update(0, SpaceInvadersVideo::crtHeight/2, SpaceInvadersVideo::crtWidth,
-        //     SpaceInvadersVideo::crtHeight/2, sf::Color::White, sf::Color::Black);
-        // cpu.issueRSTInterrupt(Cpu::RestartInstructions::RST2);    
     }
 
     void SpaceInvadersApplication::draw()

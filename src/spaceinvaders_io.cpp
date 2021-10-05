@@ -6,6 +6,9 @@ namespace emulator
 {
     namespace
     {
+        /*
+            Enum of the sounds available in the Space Invaders cabinet.
+        */
         enum Sounds
         {
             Ufo = 0,
@@ -19,6 +22,9 @@ namespace emulator
             UfoHit     
         };
 
+        // The output ports attached to the intel 8080 that are responsible for playing sounds
+        // encode the different sounds using bitmasks. 
+        // This is a table of the bit masks that correspond to the sounds defined in the above enumeration.
         static const byte soundMasks[SpaceInvadersIO::numberOfSounds] = 
         {
             0x01,
@@ -32,6 +38,7 @@ namespace emulator
             0x10 
         };
 
+        // Filenames of corresponding to the sounds mentioned in the above enumeration.
         static const std::string soundFileNames[SpaceInvadersIO::numberOfSounds] = 
         {
             "sounds/ufo.wav",
@@ -48,9 +55,13 @@ namespace emulator
 
     SpaceInvadersIO::SpaceInvadersIO()
     {
-        keyMapping["Fire"] = sf::Keyboard::Space;
-        keyMapping["Left"] = sf::Keyboard::Left;
-        keyMapping["Right"] = sf::Keyboard::Right;
+        // Set the key mappings to use for the different inputs encoded by the ports 1 and 2.
+
+        // According to https://www.computerarcheology.com/Arcade/SpaceInvaders/
+        // these first three inputs are not actually used by the game's code.
+        keyMapping["Fire"] = sf::Keyboard::BackSlash;
+        keyMapping["Left"] = sf::Keyboard::LBracket;
+        keyMapping["Right"] = sf::Keyboard::RBracket;
 
         keyMapping["Coin Inserted"] = sf::Keyboard::C;
         keyMapping["2 Players Start"] = sf::Keyboard::Num2;
@@ -64,6 +75,8 @@ namespace emulator
         keyMapping["2 Player Left"] = sf::Keyboard::A;
         keyMapping["2 Player Right"] = sf::Keyboard::D;
 
+        // Load the sounds to be played by the Space Invaders game. 
+        // If a sounds is not found we continue without error and simple don't play the sound.
         for (std::size_t i = 0; i < SpaceInvadersIO::numberOfSounds; ++i)
         {
             sounds[i].setVolume(soundVolume);
@@ -129,6 +142,9 @@ namespace emulator
 
     byte SpaceInvadersIO::getPort0() const
     {
+        // Port 0 handles user input from the buttons on the cabinet.
+        // However this port seems to be never used by the code.
+
         /*
         Not actually used by space invaders code.
         Port 0
@@ -151,6 +167,8 @@ namespace emulator
 
     byte SpaceInvadersIO::getPort1() const
     {
+        // Port 1 handles user input from the buttons on the cabinet.
+
         /*
         Port 1
         bit 0 = CREDIT (1 if deposit)
@@ -177,6 +195,8 @@ namespace emulator
 
     byte SpaceInvadersIO::getPort2() const
     {
+        // Port 2 handles user input from the buttons on the cabinet.
+
         /*
         Port 2
         bit 0 = DIP3 00 = 3 ships  10 = 5 ships
@@ -199,16 +219,23 @@ namespace emulator
 
     byte SpaceInvadersIO::getPort3() const
     {
+        // Port 3 implements the shift register hardware found in the Space Invaders cabinet.
+        // Returns a 8 bit chunk of the 16 bit shift register at a given offset.
+        // See https://www.computerarcheology.com/Arcade/SpaceInvaders/Hardware.html
         return (shiftRegister >> (8 - offset)) & 0xFF;
     }
 
     void SpaceInvadersIO::setPort2(byte value)
     {
+        // Port 2 is used to specify the offset used by the shift register hardware.
         offset = value & 0b0000'0111;
     }
 
     void SpaceInvadersIO::setPort3(byte value)
     {
+        // Port 3 handles 4 of the 9 sounds the Space Invaders cabinet can play.
+
+        // The ufo sound is the only sound that is meant to be played repeatedly.
         if ((value & soundMasks[Sounds::Ufo]) != 0 && 
             sounds[Sounds::Ufo].getStatus() != sf::Sound::Playing)
         {
@@ -224,11 +251,15 @@ namespace emulator
 
     void SpaceInvadersIO::setPort4(byte value)
     {
+        // Port 4 handles the byte input for the shift register.
+        // Whenever a byte is written to port 4 the shift register is shifted 8 places to the right
+        // and the new value is put in the high byte of the register.
         shiftRegister = (value << 8) | (shiftRegister >> 8);
     }
 
     void SpaceInvadersIO::setPort5(byte value)
     {
+        // Port 5 handles the remaining 5 sounds the Space Invaders cabinet can play.
         handleNonrepeatingSounds(value, previousPort5Input, 4, 5);
         previousPort5Input = value;
         return;
@@ -245,6 +276,9 @@ namespace emulator
 
     void SpaceInvadersIO::handleNonrepeatingSounds(byte value, byte previousValue, std::size_t first, std::size_t number)
     {
+        // The sounds that are not meant to be repeating (that is, all but the ufo sound)
+        // are only played if the bit corresponding to that sound changed from 0 to 1
+        // since the last time the corresponding output port has been written to.
         for (std::size_t i = first; i < first + number; ++i)
         {
             if ((value & soundMasks[i]) != 0 && 

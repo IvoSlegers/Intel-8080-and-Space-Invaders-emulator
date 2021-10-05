@@ -7,6 +7,9 @@
 
 namespace emulator
 {
+    /*
+        Table containing the intel 'nmemonics' for the instructions indexed by their corresponding opcodes.
+    */
     const std::string nmemonics[] = {
         "NOP",
         "LXI",
@@ -266,6 +269,12 @@ namespace emulator
         "RST"
     };
 
+    /*
+        Format string the arguments to the differnt instructions indexed by opcodes.
+        bb is meant to be replaced by the hexadecimal representation of the byte that follows the instruction.
+        wwww is meant to be replaced by the hexadecimal representation of the word that is determined
+        by the two bytes following the instruction.
+    */
     const std::string arguments[] = {
         "",
         "BC, wwww",
@@ -525,6 +534,9 @@ namespace emulator
         "7"
     };
 
+    /*
+        Length (in bytes) of each instruction including its arguments.
+    */
     const byte instructionLengths[] = {
         1,
         3,
@@ -784,6 +796,10 @@ namespace emulator
         1
     };
 
+    // Formats an argument string of an instruction.
+    // Replaces any 'bb' in a argument format string with the hexadecimal representation of byte2
+    // Replaces any 'wwww' with the hexadecimal representation of the word determined by byte2 and byte3.
+    // Returns the formatted argument string.
     inline std::string formatInstructionArguments(byte opCode, byte byte2, byte byte3)
     {   
         std::size_t pos = arguments[opCode].find("bb", 0);

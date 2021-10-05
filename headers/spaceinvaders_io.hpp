@@ -10,6 +10,9 @@
 
 namespace emulator
 {
+    /*
+        Class that emulates the IO ports founds in the space invaders arcade system.
+    */
     class SpaceInvadersIO : public IO
     {
         public:
@@ -19,6 +22,8 @@ namespace emulator
             virtual byte get(byte port) const override;
             virtual void set(byte port, byte value) override;
 
+            // The space invaders arcade cabinet had some DIP switches (for the owner of the cabinet) 
+            // which regulated some of the game options.
             static constexpr bool dip3 = false, dip4 = false, dip5 = false, dip6 = false, dip7 = false;
 
             static constexpr std::size_t numberOfSounds = 9;

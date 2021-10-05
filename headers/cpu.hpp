@@ -11,6 +11,10 @@ namespace emulator
     class Cpu
     {
         public:
+            /*
+                Enum of the RST0 through RST7 instructions.
+                Enum value is the address to which each instruction jumps.
+            */
             enum class RestartInstructions : byte
             {
                 RST0 = 0,
@@ -26,11 +30,18 @@ namespace emulator
         public:
             explicit Cpu(Memory&, IO&);
 
+            // Resets the cpu state and instruction and machine cycle counters.
             void reset();
 
+            // Execute the instruction pointed at by the program counter.
             // Returns the number of machine cycles needed to execute the command.
+            // If cpu is in halted state, does nothing and returns 0.
             std::size_t executeInstructionCycle();
 
+            // Execute instructions until a halted state is reached.
+            // Caution: If memory is loaded with a program that does not reach an halted state
+            // then this function will hang.
+            // Returns the number of machine cycles executed.
             std::size_t executeUntilHalt();
 
             const Memory& getMemory() const { return memory; }
@@ -39,6 +50,11 @@ namespace emulator
             const std::size_t getExecutedInstructionCyles() const { return executedInstructionCycles; }
             const std::size_t getExecutedMachineCyles() const { return executedMachineCycles; }
 
+            // Emulates the the response of the intel 8080 when the INTERRUPT input is set to high
+            // and a RSTn instruction is put on the data bus.
+            // Caution: Does not completely accurately mimick the intel 8080.
+            // Namely, the RSTn instruction is immediately executed when this method is callled.
+            // Rather than waiting for the appropriate number of machine cycles.
             // Returns the number of machine cycles needed to execute the command.
             std::size_t issueRSTInterrupt(byte address);
 
@@ -60,6 +76,7 @@ namespace emulator
             std::size_t executedMachineCycles = 0;
 
         private:
+            // Sets the zero, sign and parity flags depending on the state of register A.
             void setZSPFlags(byte result);
 
             void executeINR(byte& reg);

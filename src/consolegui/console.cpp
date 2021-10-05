@@ -84,6 +84,8 @@ namespace console
         {
             INPUT_RECORD record;
             DWORD numberOfEventsRead;
+
+            // This is a blocking function.
             if (!ReadConsoleInput(inputHandle, &record, 1, &numberOfEventsRead))
                 return false;
 
@@ -97,6 +99,8 @@ namespace console
         {
             char buffer[128];
             DWORD numberOfCharacters;
+
+            // This is a blocking function.
             if (!ReadConsoleA(inputHandle, buffer, 128, &numberOfCharacters, nullptr))
                 return false;
 
@@ -115,9 +119,11 @@ namespace console
 
             while (true)
             {
+                // This is a blocking function.
                 if (!ReadConsoleInput(inputHandle, &record, 1, &numberOfEventsRead))
                     return false;
 
+                // If the event read from the input buffer is not a keyboard event we try again.
                 if (record.EventType != KEY_EVENT)
                     continue;
 
@@ -129,6 +135,8 @@ namespace console
         {
             char buffer[128];
             DWORD numberOfCharacters;
+
+            // This is a blocking function.
             if (!ReadConsoleA(inputHandle, buffer, 128, &numberOfCharacters, nullptr))
                 return false;
 

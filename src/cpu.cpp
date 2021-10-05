@@ -53,7 +53,7 @@ namespace emulator
 
             // LXI RP, Load register pair immediate
             // Note: the cpu is little endian, so the high byte (B, D or H) is after 
-            // the low byte (C, E or L) in memory.
+            // the low byte (C, E or L) in memory. Hence we use the helper function Memory::getWord.
 
             // BC
             case 0x01:
@@ -765,288 +765,288 @@ namespace emulator
             // ADD
             // Add value of specified register or memory to accumulator
 
-            case 0x80:
+            case 0x80: // B
                 executeADD(state.B);
                 break;
 
-            case 0x81:
+            case 0x81: // C
                 executeADD(state.C);
                 break;
 
-            case 0x82:
+            case 0x82: // D
                 executeADD(state.D);
                 break;
 
-            case 0x83:
+            case 0x83: // E
                 executeADD(state.E);
                 break;
 
-            case 0x84:
+            case 0x84: // H
                 executeADD(state.H);
                 break;
 
-            case 0x85:
+            case 0x85: // L
                 executeADD(state.L);
                 break;
 
-            case 0x86:
+            case 0x86: // M
                 executeADD(memory.get(state.getHL()));
                 executedMachineCycles += 3;
                 break;
 
-            case 0x87:
+            case 0x87: // A
                 executeADD(state.A);
                 break;
 
             // SUB
             // Subtract value of specified register or memory from accumulator
 
-            case 0x90:
+            case 0x90: // B
                 executeSUB(state.B);
                 break;
 
-            case 0x91:
+            case 0x91: // C
                 executeSUB(state.C);
                 break;
 
-            case 0x92:
+            case 0x92: // D
                 executeSUB(state.D);
                 break;
 
-            case 0x93:
+            case 0x93: // E
                 executeSUB(state.E);
                 break;
 
-            case 0x94:
+            case 0x94: // H
                 executeSUB(state.H);
                 break;
 
-            case 0x95:
+            case 0x95: // L
                 executeSUB(state.L);
                 break;
 
-            case 0x96:
+            case 0x96: // M
                 executeSUB(memory.get(state.getHL()));
                 executedMachineCycles += 3;
                 break;
 
-            case 0x97:
+            case 0x97: // A
                 executeSUB(state.A);
                 break;
 
             // ANA
             // Do a bitwise logical AND on the value of the accumulator and the specified register or memory.
 
-            case 0xA0:
+            case 0xA0: // B
                 executeANA(state.B);
                 break;
 
-            case 0xA1:
+            case 0xA1: // C
                 executeANA(state.C);
                 break;
 
-            case 0xA2:
+            case 0xA2: // D
                 executeANA(state.D);
                 break;
 
-            case 0xA3:
+            case 0xA3: // E
                 executeANA(state.E);
                 break;
 
-            case 0xA4:
+            case 0xA4: // H
                 executeANA(state.H);
                 break;
 
-            case 0xA5:
+            case 0xA5: // L
                 executeANA(state.L);
                 break;
 
-            case 0xA6:
+            case 0xA6: // M
                 executeANA(memory.get(state.getHL()));
                 executedMachineCycles += 3;
                 break;
 
-            case 0xA7:
+            case 0xA7: // A
                 executeANA(state.A);
                 break;
 
             // ORA
             // Do a bitwise logical or on the value of the accumulator and specified register or memory.
 
-            case 0xB0:
+            case 0xB0: // B
                 executeORA(state.B);
                 break;
 
-            case 0xB1:
+            case 0xB1: // C
                 executeORA(state.C);
                 break;
 
-            case 0xB2:
+            case 0xB2: // D
                 executeORA(state.D);
                 break;
 
-            case 0xB3:
+            case 0xB3: // E
                 executeORA(state.E);
                 break;
 
-            case 0xB4:
+            case 0xB4: // H
                 executeORA(state.H);
                 break;
 
-            case 0xB5:
+            case 0xB5: // L
                 executeORA(state.L);
                 break;
 
-            case 0xB6:
+            case 0xB6: // M
                 executeORA(memory.get(state.getHL()));
                 executedMachineCycles += 3;
                 break;
 
-            case 0xB7:
+            case 0xB7: // A
                 executeORA(state.A);
                 break;
 
             // ADC (Add with carry)
             // Add value of specified register or memory plus the carry bit to the contents of the accumulator
 
-            case 0x88:
+            case 0x88: // B
                 executeADD(state.B, state.CY);
                 break;
 
-            case 0x89:
+            case 0x89: // C
                 executeADD(state.C, state.CY);
                 break;
 
-            case 0x8A:
+            case 0x8A: // D
                 executeADD(state.D, state.CY);
                 break;
 
-            case 0x8B:
+            case 0x8B: // E
                 executeADD(state.E, state.CY);
                 break;
 
-            case 0x8C:
+            case 0x8C: // H
                 executeADD(state.H, state.CY);
                 break;
 
-            case 0x8D:
+            case 0x8D: // L
                 executeADD(state.L, state.CY);
                 break;
 
-            case 0x8E:
+            case 0x8E: // M
                 executeADD(memory.get(state.getHL()), state.CY);
                 executedMachineCycles += 3;
                 break;
 
-            case 0x8F:
+            case 0x8F: // A
                 executeADD(state.A, state.CY);
                 break;
 
             // SBB (Subtract with borrow)
             // Subtract value of specified register or memory plus the carry bit from the contents of the accumulator
 
-            case 0x98:
+            case 0x98: // B 
                 executeSUB(state.B, state.CY);
                 break;
 
-            case 0x99:
+            case 0x99: // C
                 executeSUB(state.C, state.CY);
                 break;
 
-            case 0x9A:
+            case 0x9A: // D
                 executeSUB(state.D, state.CY);
                 break;
 
-            case 0x9B:
+            case 0x9B: // E
                 executeSUB(state.E, state.CY);
                 break;
 
-            case 0x9C:
+            case 0x9C: // H
                 executeSUB(state.H, state.CY);
                 break;
 
-            case 0x9D:
+            case 0x9D: // L
                 executeSUB(state.L, state.CY);
                 break;
 
-            case 0x9E:
+            case 0x9E: // M
                 executeSUB(memory.get(state.getHL()), state.CY);
                 executedMachineCycles += 3;
                 break;
 
-            case 0x9F:
+            case 0x9F: // A
                 executeSUB(state.A, state.CY);
                 break;
 
             // XRA
             // Perform a bitwise logical or with the value of the specified register or memory and the contents of the accumulator.
 
-            case 0xA8:
+            case 0xA8: // B
                 executeXRA(state.B);
                 break;
 
-            case 0xA9:
+            case 0xA9: // C
                 executeXRA(state.C);
                 break;
 
-            case 0xAA:
+            case 0xAA: // D
                 executeXRA(state.D);
                 break;
 
-            case 0xAB:
+            case 0xAB: // E
                 executeXRA(state.E);
                 break;
 
-            case 0xAC:
+            case 0xAC: // H
                 executeXRA(state.H);
                 break;
 
-            case 0xAD:
+            case 0xAD: // L
                 executeXRA(state.L);
                 break;
 
-            case 0xAE:
+            case 0xAE: // M
                 executeXRA(memory.get(state.getHL()));
                 executedMachineCycles += 3;
                 break;
 
-            case 0xAF:
+            case 0xAF: // A
                 executeXRA(state.A);
                 break;
 
             // CMP
             // Compare value of specified register or memory with the value of the accumulator
 
-            case 0xB8:
+            case 0xB8: // B
                 executeCMP(state.B);
                 break;
 
-            case 0xB9:
+            case 0xB9: // C
                 executeCMP(state.C);
                 break;
 
-            case 0xBA:
+            case 0xBA: // D
                 executeCMP(state.D);
                 break;
 
-            case 0xBB:
+            case 0xBB: // E
                 executeCMP(state.E);
                 break;
 
-            case 0xBC:
+            case 0xBC: // H
                 executeCMP(state.H);
                 break;
 
-            case 0xBD:
+            case 0xBD: // L
                 executeCMP(state.L);
                 break;
 
-            case 0xBE:
+            case 0xBE: // M
                 executeCMP(memory.get(state.getHL()));
                 executedMachineCycles += 3;
                 break;
 
-            case 0xBF:
+            case 0xBF: // A
                 executeCMP(state.A);
                 break;
 
@@ -1463,6 +1463,9 @@ namespace emulator
         {
             executeRST(address);
 
+            // After an interrupt the processing is resumed and further interrupts are disabled.
+            // Any code handling an interrupt must call the EI instruction for it to receive 
+            // any more interrupts.
             state.halted = false;
             state.interruptsEnabled = false;
 
@@ -1482,6 +1485,9 @@ namespace emulator
 
     void Cpu::executeINR(byte& reg)
     {
+        // The carry flag is not set by the INR instruction. Even if the register overflows.
+
+        // The auxiliary flag is set however.
         state.CA = (reg & 0x0F) == 0x0F;
         ++reg;
         setZSPFlags(reg);
@@ -1491,6 +1497,7 @@ namespace emulator
 
     void Cpu::executeDCR(byte& reg)
     {
+        // Also the DCR instruction does not set the carry (borrow) flag. The auxiliary flag is set.
         state.CA = (reg & 0x0F) != 0;
         --reg;
         setZSPFlags(reg);

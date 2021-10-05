@@ -20,33 +20,32 @@ namespace emulator
         public:
             explicit SpaceInvadersApplication();
 
+            // Run the application.
             void run();
 
-            void reset();
-            void quit();
-
         private:
-            //void onConsoleEvent(const Console::Event& event);
             void onEvent(const sf::Event& event);
 
             void handleEvents();
             void update(float delta);
             void draw();
 
+            void reset();
+            void quit();
+
             Memory memory;
             SpaceInvadersIO io;
             DiagnosticCpu cpu;
 
             sf::RenderWindow window;
-            //Console console;
 
-            //ConsoleUI consoleUI;
             SpaceInvadersVideo video;
 
             int machineCyclesToBeExecuted = 0;
             sf::Clock screenTimer;
-            bool upperHalf = true;
 
-            //bool running = false;
+            // The Space Invaders game updates the top and bottom halves of the screen at different times
+            // This flag records which has last been updated. 
+            bool upperHalf = true;
     };
 } // namespace emulator

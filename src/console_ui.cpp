@@ -145,7 +145,7 @@ namespace emulator
     {
         if (selectedInstructionIndex > firstDisplayedInstructionIndex)
             selectedInstructionIndex--;
-        else
+        else // try to scroll up if the currently selected instruction is the top one.
         {
             scrollUp();
 
@@ -158,7 +158,7 @@ namespace emulator
     {
         if (selectedInstructionIndex < (firstDisplayedInstructionIndex + numberOfInstructionsDisplayed - 1))
             selectedInstructionIndex++;
-        else
+        else // try to scroll down if the currently selected instruction is the bottom one.
         {
             scrollDown();
 
@@ -172,6 +172,7 @@ namespace emulator
         firstDisplayedInstructionIndex = std::max(
             0, static_cast<int>(firstDisplayedInstructionIndex) - lines);
 
+        // Make sure the selection is always in the list of displayed instructions.
         selectedInstructionIndex = std::max(selectedInstructionIndex, firstDisplayedInstructionIndex);
     }
 
@@ -186,6 +187,7 @@ namespace emulator
             displayedInstructionsCache.size() - 1,
             firstDisplayedInstructionIndex + lines);
 
+        // Make sure the selection is always in the list of displayed instructions.
         selectedInstructionIndex = std::min<unsigned int>(selectedInstructionIndex,
             firstDisplayedInstructionIndex + numberOfInstructionsDisplayed - 1);
     }
@@ -206,6 +208,10 @@ namespace emulator
         instruction.address = address;
         instruction.opCode = memory.get(address);
 
+        // For instructions of length 2 or 3 the proceeding bytes contain the 
+        // parameters for the instruction. We pass the proceeding bytes to the 
+        // function formatInstructionArguments regardless of the instruction length
+        // byte2 and byte3 will only be used when necessary.
         byte byte2 = 0, byte3 = 0;
 
         if (static_cast<unsigned int>(address + 1) < memory.getTotalSize())
@@ -562,7 +568,7 @@ namespace emulator
     {
         std::smatch match;
 
-        // Handle commands of the form: command address
+        // Handle commands of the form: <command> <address>
         
         std::regex commandWithAddressRegex(R"--(\s*(\w+)\s+([0-9|a-f]{1,4})\s*)--",
              std::regex_constants::icase);
@@ -607,7 +613,7 @@ namespace emulator
             }
         }     
 
-        // Handle commands of the form: command filename
+        // Handle commands of the form: <command> <filename>
 
         std::regex commandWithFilenameRegex(R"--(\s*(\w+)\s+((\w+)(.\w+)?)\s*)--",
             std::regex_constants::icase);

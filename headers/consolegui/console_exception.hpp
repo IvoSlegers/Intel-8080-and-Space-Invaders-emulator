@@ -12,13 +12,14 @@ namespace console
     {
         public:
             explicit ConsoleException(const std::string& message_): message(message_) {}
+            virtual ~ConsoleException() {}
 
             const std::string& getMessage() const
             {
                 return message;
             }
 
-            const char* what() const override
+            virtual const char* what() const noexcept override
             {
                 return message.c_str();
             }

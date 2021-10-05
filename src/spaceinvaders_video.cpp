@@ -17,8 +17,11 @@ namespace emulator
 
         sprite.setPosition(50, 50 + scalingFactor * crtWidth);
         sprite.setScale(sf::Vector2f(scalingFactor, scalingFactor));
+
+        // The CRT in the Space Invaders cabinet was rotated 90 degrees counter-clockwise.
         sprite.setRotation(-90.f);
 
+        // The SFML texture by default takes data buffer with RGBA pixels.
         videoData = std::make_unique<byte[]>(static_cast<std::size_t>(4 * crtWidth * crtHeight));
 
         outline.setOutlineColor(sf::Color::White);
@@ -43,6 +46,7 @@ namespace emulator
                 unsigned short pixelX = x + i;                
                 unsigned short pixelNumber = pixelY * crtWidth + pixelX;
 
+                // Each byte encodes 8 pixels.
                 word address = videoBufferAddress + (pixelNumber / 8);
                 byte bitNumber = pixelNumber % 8;
 

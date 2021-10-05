@@ -72,6 +72,8 @@ namespace emulator
                     "Memory address (" + std::to_string(address) + ") out of range in Memory::getWord.");
         #endif
 
+        // At this place we need to mind that the intel 8080 is a little endian processor.
+        // Hence the high byte is located at address + 1, the low byte at address.
         return bytesAsWord(data[address + 1], data[address]);
     }
 
@@ -83,6 +85,7 @@ namespace emulator
                     "Memory address (" + std::to_string(address) + ") out of range in Memory::setWord.");
         #endif
 
+        // Like in Memory::getWord we need to be mindful of the fact that the intel 8080 is little endian.
         wordAsBytePair(value, data[address + 1], data[address]);
     }
 

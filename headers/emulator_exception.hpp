@@ -19,7 +19,7 @@ namespace emulator
                 return message;
             }
 
-            const char* what() const override
+            const char* what() const noexcept override
             {
                 return message.c_str();
             }

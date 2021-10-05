@@ -16,7 +16,8 @@ namespace console
 
     ScreenBuffer::~ScreenBuffer()
     {
-        // Close the screen buffer only if it is owned by the class (i.e. is not the default screen buffer).        if (ownsHandle && handle != INVALID_HANDLE_VALUE)
+        // Close the screen buffer only if it is owned by the class (i.e. is not the default screen buffer).        
+        if (ownsHandle && handle != INVALID_HANDLE_VALUE)
             CloseHandle(handle);
     }
 

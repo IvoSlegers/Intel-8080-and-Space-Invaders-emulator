@@ -3,37 +3,26 @@
 
 #include "consolegui/console_exception.hpp"
 #include "emulator_exception.hpp"
-#include "defines.hpp"
 
 #include <iostream>
-#include <sstream>
-
-// TODO
-// - implement screen drawing interrupt system
-// - implement sound
-// - implement port 6 output = reset
-// - add a parameter scaling factor to video component
-// - Wrap all Space Invaders specific stuff into a SpaceInvadersCabinet class.
-// - Implement breakpoints system
-// Possible interesting breakpoint 2778
-// - Using a set for breakpoints is potentially slow, replace by large bool array?
-// - Remove all the 'executed machine cycles += 5' with a table lookup
-// - Make the switch statement nicer (see supersazu's emulator)
-// - Implement a run until end function for cpu diagnostics application
-// - implement move, view, breakpoint commands
-// - Make classes that need to be non-copyable
-// - Look at unique_ptr to see how a move-only class should be implemented.
-// - Properly implement a executed instructions log (move run until halt & logging into consoleUI)
-// - Implement cyc checking?
-// - Implement a space invaders debug version
-// - Implement color overlay (see https://github.com/howprice/invaders-emulator/blob/master/src/machine.cpp)
-// - A solution to the sound looping issue could be to only play a sound if it is now played the previous time the out port is written
 
 #if EMULATOR_LOG_SFML_ERRORS
     #include <SFML/System.hpp>
     #include <fstream>
     #include <chrono>
 #endif
+
+void runSpaceInvadersApplication()
+{
+    emulator::SpaceInvadersApplication app;
+    app.run();
+}
+
+void runDiagnosticsApplication()
+{
+    emulator::DiagnosticApplication app;
+    app.run();
+}
 
 int main(int argc, const char* argv[])
 {
@@ -47,9 +36,21 @@ int main(int argc, const char* argv[])
 
     try
     {
-        emulator::SpaceInvadersApplication app;
-        //emulator::DiagnosticApplication app;
-        app.run();
+        if (argc >= 2)
+        {
+            std::string argument(argv[1]);
+            if (argument == "-d" || argument == "-diagnostic")
+            {
+                runDiagnosticsApplication();
+            }
+            else
+            {
+                runSpaceInvadersApplication();
+            }
+        }
+        else
+            runSpaceInvadersApplication();
+
     }
     catch (const console::ConsoleException& exception)
     {

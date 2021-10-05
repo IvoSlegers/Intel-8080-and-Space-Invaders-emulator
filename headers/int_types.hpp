@@ -22,7 +22,6 @@ namespace emulator
     /*
         Functions for packing two bytes into words and unpacking words into bytes.
     */
-
     inline word bytesAsWord(byte high, byte low)
     {
         return (static_cast<word>(high) << 8) + low;
