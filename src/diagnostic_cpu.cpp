@@ -4,8 +4,6 @@
 
 #include <fstream>
 
-#include <iostream>
-
 namespace emulator
 {
     DiagnosticCpu::DiagnosticCpu(Memory& memory_, IO& io_): Cpu(memory_, io_)
@@ -13,15 +11,13 @@ namespace emulator
     
     std::size_t DiagnosticCpu::executeInstructionCycle()
     {
-        std::size_t machineCycles = Cpu::executeInstructionCycle();
-
-        if (isBreakpoint(state.PC))
+        if (!state.halted && isBreakpoint(state.PC))
         {
             halt();
             return 0;
         }
 
-        return machineCycles;
+        return Cpu::executeInstructionCycle();
     }
     
     void DiagnosticCpu::addBreakpoint(word address)

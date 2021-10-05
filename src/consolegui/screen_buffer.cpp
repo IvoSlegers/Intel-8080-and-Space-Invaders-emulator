@@ -16,7 +16,7 @@ namespace console
 
     ScreenBuffer::~ScreenBuffer()
     {
-        if (ownsHandle && handle != INVALID_HANDLE_VALUE)
+        // Close the screen buffer only if it is owned by the class (i.e. is not the default screen buffer).        if (ownsHandle && handle != INVALID_HANDLE_VALUE)
             CloseHandle(handle);
     }
 
@@ -45,6 +45,9 @@ namespace console
 
     void ScreenBuffer::clear()
     {
+        // The buffer is cleared by filling the character array by spaces and resetting the
+        // attributes array to be filled with the default attribute.
+        
         CONSOLE_SCREEN_BUFFER_INFO consoleBufferInfo;
         COORD zero{0, 0};
 
@@ -88,7 +91,7 @@ namespace console
 
         if (!GetConsoleScreenBufferInfo(handle, &consoleBufferInfo))
         {
-            throw ConsoleException("Could not retrieve console buffer info in ScreenBuffer::getScreenSize.");
+            throw ConsoleException("Could not retrieve console buffer info in ScreenBuffer::getWindowSize.");
         }
 
         return {consoleBufferInfo.dwCursorPosition.X, consoleBufferInfo.dwCursorPosition.Y};       
@@ -100,7 +103,7 @@ namespace console
         
         if (!GetConsoleScreenBufferInfo(handle, &consoleBufferInfo))
         {
-            throw ConsoleException("Could not retrieve console buffer info in ScreenBuffer::getScreenSize.");
+            throw ConsoleException("Could not retrieve console buffer info in ScreenBuffer::getWindowSize.");
         }
 
         return 
@@ -117,7 +120,7 @@ namespace console
         SetConsoleWindowInfo(handle, true, &windowPosition);
     }
 
-    Size ScreenBuffer::getScreenSize() const
+    Size ScreenBuffer::getWindowSize() const
     {
         WindowPosition position = getWindowPosition();
         Size size;
@@ -154,6 +157,8 @@ namespace console
 
     void ScreenBuffer::setTextColor(const Color foreground, const Color background)
     {
+        // The Win32 enums for the background colors correspond to the enums for the foreground
+        // color shifted 4 bits to the left.
         WORD attributes = static_cast<WORD>(foreground) | (static_cast<WORD>(background) << 4);
 
         if (!SetConsoleTextAttribute(handle, attributes))

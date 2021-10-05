@@ -4,20 +4,24 @@
 
 namespace emulator
 {
-    using u8 = uint8_t;
-    using u16 = uint16_t;
+    /*
+        Definitions of the byte (8 bits) and word (16 bits) unsigned integer types.
+    */
+    using byte = uint8_t;
+    using word = uint16_t;
 
-    using i8 = int8_t;
-    using i16 = int16_t;
-
-    using byte = u8;
-    using word = u16;
-
+    /*
+        Helper struct to unpack a word of the form <high byte><low byte> into two bytes.
+    */
     struct BytePair
     {
         byte high;
         byte low;
     };
+
+    /*
+        Functions for packing two bytes into words and unpacking words into bytes.
+    */
 
     inline word bytesAsWord(byte high, byte low)
     {

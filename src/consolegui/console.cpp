@@ -19,6 +19,7 @@ namespace console
         GetConsoleMode(inputHandle, &previousInputMode);
         GetConsoleMode(outputHandle, &previousOutputMode);
 
+        // Disable word wrap
         DWORD newMode = previousOutputMode & (~ENABLE_WRAP_AT_EOL_OUTPUT);
         SetConsoleMode(outputHandle, newMode);
 
@@ -69,6 +70,8 @@ namespace console
 
     bool Console::pollEvent(Event& event)
     {
+        // The functions ReadConsoleInput and ReadConsoleA are blocking so we only 
+        // call these if an event is in the input buffer.
         DWORD numberOfEvents;
         if (!GetNumberOfConsoleInputEvents(inputHandle, &numberOfEvents))
             return false;

@@ -19,56 +19,9 @@ namespace emulator
         console(console_), cpu(cpu_), memory(memory_)
     {}
 
-    unsigned int InstructionsDisplay::addInstructionToCache(word address)
-    {
-        Instruction instruction;
-
-        instruction.address = address;
-        instruction.opCode = memory.get(address);
-
-        byte byte2 = 
-            (static_cast<std::size_t>(address + 1) < memory.getTotalSize()) ? memory.get(address + 1) : 0;
-        byte byte3 = 
-            (static_cast<std::size_t>(address + 2) < memory.getTotalSize()) ? memory.get(address + 2) : 0;
-
-        instruction.arguments = formatInstructionArguments(instruction.opCode, byte2, byte3);
-
-        displayedInstructionsCache.push_back(instruction);
-
-        return address + instructionLengths[instruction.opCode];
-    }
-
-    unsigned int InstructionsDisplay::addInstructionsToCache(word startAddress, unsigned int number)
-    {
-        unsigned int address = startAddress;
-        for (unsigned int i = 0; i < number; ++i)
-        {
-            address = addInstructionToCache(address);
-
-            if (address >= memory.getTotalSize())
-                break;
-        }
-
-        return address;
-    }
-
-    void InstructionsDisplay::growCache(unsigned int number)
-    {
-        if (displayedInstructionsCache.empty())
-            return;
-
-        Instruction& lastInstruction = displayedInstructionsCache.back();
-
-        unsigned int address = lastInstruction.address + instructionLengths[lastInstruction.opCode];
-
-        if (address < memory.getTotalSize())
-        {
-            addInstructionsToCache(address, number);
-        }
-    }
-
     void InstructionsDisplay::draw(short x, short y)
     {
+        // Grow the displayed instructions cache it holds fewer items than we want to display.
         std::size_t cacheSize = displayedInstructionsCache.size();
         if (firstDisplayedInstructionIndex +  numberOfInstructionsDisplayed > cacheSize)
         {
@@ -107,6 +60,7 @@ namespace emulator
     {
         byte opCode = instruction.opCode;
 
+        // List of instructions (JMP, CALL, RET) which encode a target address in the memory next to them
         static const std::set<byte> controlFlowOpCodes = 
             {
                 0xC2, 0xD2, 0xE2, 0xF2,
@@ -130,7 +84,7 @@ namespace emulator
         }
 
         // RST instructions.
-        // The opcode for RST looks like 11NNN111
+        // The opcode for RST looks like 11NNN111 where 00NNN000 is the address to jump to.
         if ((opCode & 0b11000111) == 0b11000111)
         {
             moveTo(opCode && 0b001111000);
@@ -157,19 +111,30 @@ namespace emulator
         int firstAddress = displayedInstructionsCache.front().address;
         int lastAddress = displayedInstructionsCache.back().address;
 
-        if (address < firstAddress - 6 || address > lastAddress + 6)
+        // If the address is outside the instructions cache move immediately to the given address.
+        if (address < firstAddress || address > lastAddress + 6)
         {
             moveTo(address);
             return;
         }
 
-        if (address <= firstAddress + 6)
+        // If the address is at the top of the displayed instructions list scroll up to center it.
+        int firstDisplayedAddress = displayedInstructionsCache[firstDisplayedInstructionIndex].address;
+
+        if (address <= firstDisplayedAddress + 6)
         {
             scrollUp(3);
             return;
         }
 
-        if (address >= lastAddress - 6)
+        // If the address is at the bottom of the displayed instructions list scroll down.
+        std::size_t lastDisplayedIndex = 
+            std::min<int>(firstDisplayedInstructionIndex + numberOfInstructionsDisplayed, displayedInstructionsCache.size() -1);
+
+        int lastDisplayedAddress = 
+            displayedInstructionsCache[lastDisplayedIndex].address;
+
+        if (address >= lastDisplayedAddress - 6)
         {
             scrollDown(3);
             return;
@@ -234,6 +199,58 @@ namespace emulator
         return true;
     }
 
+    unsigned int InstructionsDisplay::addInstructionToCache(word address)
+    {
+        Instruction instruction;
+
+        instruction.address = address;
+        instruction.opCode = memory.get(address);
+
+        byte byte2 = 0, byte3 = 0;
+
+        if (static_cast<unsigned int>(address + 1) < memory.getTotalSize())
+            byte2 = memory.get(address + 1);
+
+        if (static_cast<unsigned int>(address + 2) < memory.getTotalSize())
+            byte3 = memory.get(address + 2);
+
+        instruction.arguments = formatInstructionArguments(instruction.opCode, byte2, byte3);
+
+        displayedInstructionsCache.push_back(instruction);
+
+        return address + instructionLengths[instruction.opCode];
+    }
+
+    unsigned int InstructionsDisplay::addInstructionsToCache(word startAddress, unsigned int number)
+    {
+        unsigned int address = startAddress;
+        for (unsigned int i = 0; i < number; ++i)
+        {            
+            if (address >= memory.getTotalSize())
+                break;
+
+            address = addInstructionToCache(address);
+        }
+
+        return address;
+    }
+
+    void InstructionsDisplay::growCache(unsigned int number)
+    {
+        if (displayedInstructionsCache.empty())
+            return;
+
+        Instruction& lastInstruction = displayedInstructionsCache.back();
+
+        unsigned int address = lastInstruction.address + instructionLengths[lastInstruction.opCode];
+
+        // Check address has not overflowed to a number larger than the largest possible memory address (0xFFFF).
+        if (address < memory.getTotalSize())
+        {
+            addInstructionsToCache(address, number);
+        }
+    }
+
     void InstructionsDisplay::drawInstruction(const Instruction& instruction, bool isSelected, bool isCurrent,
         bool isBreakpoint, short x, short y)
     {
@@ -281,7 +298,7 @@ namespace emulator
         instructionsDisplay(console_, cpu_, memory_)
     {}
 
-    void ConsoleUI::signalMemoryChanged()
+    void ConsoleUI::notifyMemoryChanged()
     {
         instructionsDisplay.moveTo(cpu.getState().PC, false);
     }
@@ -297,7 +314,7 @@ namespace emulator
         drawHelp();
         drawDialog();
 
-        console.setCursorPosition(0, console.getScreenSize().height);
+        console.setCursorPosition(0, console.getWindowSize().height);
 
         console.setActiveScreenBuffer(previousScreenBufferIndex);
     }
@@ -306,10 +323,10 @@ namespace emulator
     {
         if (event.isDirectInput)
         {
-            const KEY_EVENT_RECORD& keyEvent = event.keyEvent;
-
-            if (!keyEvent.bKeyDown)
+            if (!event.keyEvent.bKeyDown)
                 return;
+
+            const KEY_EVENT_RECORD& keyEvent = event.keyEvent;
 
             InstructionsDisplay::Instruction instruction;
             std::size_t index;
@@ -504,9 +521,6 @@ namespace emulator
 
     void ConsoleUI::beginDialog(const std::string& prompt)
     {
-        dialogInput.str(std::string());
-        dialogInput.clear();
-
         isInDialogMode = true;
         dialogPrompt = prompt;
 
@@ -527,7 +541,7 @@ namespace emulator
     {
         if (isInDialogMode)
         {
-            short height = console.getScreenSize().height;
+            short height = console.getWindowSize().height;
 
             console.setCursorPosition(0, height - 1);
             console.write(dialogPrompt);
@@ -540,13 +554,15 @@ namespace emulator
     {
         draw();
 
-        console.setCursorPosition(0, console.getScreenSize().height);
+        console.setCursorPosition(0, console.getWindowSize().height);
         console.write(message);
     }
 
     void ConsoleUI::handleCommand(const std::string& command)
     {
         std::smatch match;
+
+        // Handle commands of the form: command address
         
         std::regex commandWithAddressRegex(R"--(\s*(\w+)\s+([0-9|a-f]{1,4})\s*)--",
              std::regex_constants::icase);
@@ -563,12 +579,13 @@ namespace emulator
             std::transform(match[1].first, match[1].second, commandString.begin(), 
                 [] (char c) { return std::tolower(c); });
 
-            // Because match[1] matches the regex it must be well-formed.
+            // Because match[1] matches the hex number pattern specified regex it must be well-formed.
             word address = std::stoi(match[2], nullptr, 16);
 
             if (commandString == "breakpoint")
             {
                 cpu.toggleBreakpoint(address);
+
                 draw();
                 return;
             }
@@ -578,18 +595,19 @@ namespace emulator
                 cpu.setProgramCounter(address);
 
                 draw();
-
                 return;
             }
 
             if (commandString == "view")
             {
                 instructionsDisplay.moveTo(address);
-                draw();
 
+                draw();
                 return;
             }
         }     
+
+        // Handle commands of the form: command filename
 
         std::regex commandWithFilenameRegex(R"--(\s*(\w+)\s+((\w+)(.\w+)?)\s*)--",
             std::regex_constants::icase);
@@ -609,16 +627,16 @@ namespace emulator
             if (commandString == "save")
             {
                 cpu.saveBreakpoints(match[2]);
-                draw();
-                
+
+                draw();                
                 return;
             }
 
             if (commandString == "load")
             {
                 cpu.loadBreakpoints(match[2]);
-                draw();
 
+                draw();
                 return;
             }
         }

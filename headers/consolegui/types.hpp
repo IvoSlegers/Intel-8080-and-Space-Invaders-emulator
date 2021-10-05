@@ -20,6 +20,7 @@ namespace console
         short left, top, right, bottom;
     };
 
+    // Possible text colors of the console.
     enum class Color : WORD
     {
         Black = 0,

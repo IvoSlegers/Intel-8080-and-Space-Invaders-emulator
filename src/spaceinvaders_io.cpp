@@ -199,7 +199,7 @@ namespace emulator
 
     byte SpaceInvadersIO::getPort3() const
     {
-        return (shiftRegister >> (8 - offset));
+        return (shiftRegister >> (8 - offset)) & 0xFF;
     }
 
     void SpaceInvadersIO::setPort2(byte value)

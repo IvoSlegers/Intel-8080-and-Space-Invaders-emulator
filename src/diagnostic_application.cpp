@@ -46,7 +46,7 @@ namespace emulator
         console.getScreenBuffer(1).write("Loading .ROM file: " + filename + '\n');
 
         memory.loadMemoryFromFile(filename, 0x100);
-        consoleUI.signalMemoryChanged();
+        consoleUI.notifyMemoryChanged();
 
         memory[0x0005] = 0xC9;
 
@@ -184,7 +184,7 @@ namespace emulator
 
         if (event.isDirectInput && event.keyEvent.uChar.AsciiChar == 'a')
         {
-            console.getDefaultScreenBuffer().setCursorPosition(0, console.getDefaultScreenBuffer().getScreenSize().height);
+            console.getDefaultScreenBuffer().setCursorPosition(0, console.getDefaultScreenBuffer().getWindowSize().height);
             console.getDefaultScreenBuffer().write("running autonomously");
             runningAutonomously = true;
         }
