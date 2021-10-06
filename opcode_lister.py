@@ -1,3 +1,11 @@
+"""
+Simple python script meant to extract the information about the intel 8080 opcodes found at
+https://pastraiser.com/cpu/i8080/i8080_opcodes.html and convert it into
+c++ arrays containing that information.
+"""
+
+import re
+
 # raw copy past of the opcode table found at https://pastraiser.com/cpu/i8080/i8080_opcodes.html
 raw_table_string = """
 0x 	NOP
@@ -530,89 +538,138 @@ S Z A P C	RST 7
 - - - - -
 """
 
-import re
+# Generate the C++ table containing the nmemonic strings (sorted by opcode)
+def generate_nmemonics_table(nmemonics):
+    nmemonics_table_string = "const std::string nmemonics[] = {\n"
 
-splitter_re = re.compile("[0-9A-F]x")
-split_string = re.split(splitter_re, raw_table_string)
+    for i in range(255):
+        nmemonics_table_string += '"' + nmemonics[i] + '",\n'
+    nmemonics_table_string += '"' + nmemonics[255] + '"\n'
 
-instruction_re = re.compile("([A-Z*]{2,4})\s+([BCDEHLMA]|PSW|SP)?,?(a16|d8|d16|[BCDEHLMA])?")
+    nmemonics_table_string += "};"
+    return nmemonics_table_string
 
-del split_string[0]
+# Generate the C++ table containing the format string for the arguments to the instructions
+# (sorted by opcode).
+def generate_arguments_table(arguments):
+    arguments_table_string = "const std::string arguments[] = {\n"
 
-assert len(split_string) == 16, "Expected to find 16 opcode groups"
+    for i in range(255):
+        arguments_table_string += '"' + arguments[i] + '",\n'
+    arguments_table_string += '"' + arguments[255] + '"\n'
 
-nmemonics = {}
-arguments = {}
-lengths = {}
+    arguments_table_string += "};"
+    return arguments_table_string
 
-word_register_instructions = ["LXI", "POP", "PUSH", "INX", "DAD", "DCX"]
-word_register_names = {"B" : "BC", "D" : "DE", "H" : "HL", "SP" : "SP", "PSW" : "PSW"}
+# Generate the C++ table containing the lengths of the instructions (sorted by opcode).
+def generate_lengths_table():
+    lengths_table_string = "const byte instructionLengths[] = {\n"
 
-for i, part in enumerate(split_string):
-    instruction_matches = re.findall(instruction_re, part)
+    for i in range(255):
+        lengths_table_string += f"{lengths[i]},\n"
+    lengths_table_string += f"{lengths[255]}\n"
 
-    assert len(instruction_matches) == 16, "Expected to find 16 opcode in a group"
+    lengths_table_string += "};"
+    return lengths_table_string
 
-    for j, instruction in enumerate(instruction_matches):
-        opcode = i << 4 | j
+def main():
+    # first we split the table into 16 rows. Each row starts with a 1 digit hexadecimal number.
+    # we use this to as a parttern for the splitting.
+    splitter_regex = re.compile("[0-9A-F]x")
+    split_string = re.split(splitter_regex, raw_table_string)
 
-        nmemonics[opcode] = instruction[0]
+    # The first part of the raw string preceding the first row consists of whitespace
+    del split_string[0]
 
-        second_argument = ""
-        length = 1
+    # the table consists of 16 x 16 entries. Sanity check that we found 16 rows.
+    assert len(split_string) == 16, "Expected to find 16 opcode groups"
 
-        if (instruction[0] == "RST"):
-            exp = (opcode & 0b00111000) >> 3
-            second_argument = f"{exp}"
-        else:
-            if (instruction[2] == 'd8'):
-                second_argument = 'bb'
-                length = 2
-            elif (instruction[2] in ['a16', 'd16']):
-                second_argument = 'wwww'
-                length = 3
-            elif (instruction[2]):
-                second_argument = instruction[2]
+    # Regex for matching an individual opcode + arguments
+    instruction_regex = re.compile("([A-Z*]{2,4})\s+([BCDEHLMA]|PSW|SP)?,?(a16|d8|d16|[BCDEHLMA])?")
 
-        argument = ""
-        if (instruction[1]):
-            if (instruction[0] not in word_register_instructions):
-                argument += instruction[1]
+    # We use dictionaries to hold the nmemonic, argument and length information to make
+    # they can be sorted by their opcode when we produce the C++ table strings rather
+    # than being sorted by the order of their appearance in the table (which should
+    # be the same, but better safe than sorry).
+    nmemonics = {}
+    arguments = {}
+    lengths = {}
+
+    # Some instructions in the table that act on double (word) registers
+    # have the associated register listed by the sort name (i.e. B, D, H).
+    # We want to replace this by the full names (i.e. BC, DE, HL).
+
+    # table of the instructions acting on word registers.
+    word_register_instructions = ["LXI", "POP", "PUSH", "INX", "DAD", "DCX"]
+
+    # replacements for the register argument strings.
+    word_register_names = {"B" : "BC", "D" : "DE", "H" : "HL", "SP" : "SP", "PSW" : "PSW"}
+
+    # extract the instructions + arguments from the 16 rows
+    for i, part in enumerate(split_string):
+        instruction_matches = re.findall(instruction_regex, part)
+
+        assert len(instruction_matches) == 16, "Expected to find 16 opcode in a group"
+
+        for j, instruction_match in enumerate(instruction_matches):
+            opcode = i << 4 | j
+
+            nmemonics[opcode] = instruction_match[0]
+
+            # The arguments of the instructions are either empty, or of the form
+            # INST A or of the form INST A, B
+            # in the latter case A is contained in instruction_match[1] and B in
+            # instruction_match[2]. In the first case however A can be contained
+            # in either instruction_match[1] or instruction_match[2].
+
+            argument = ""
+            second_argument = ""
+            length = 1
+
+            if (instruction_match[0] == "RST"):
+                exp = (opcode & 0b00111000) >> 3
+                second_argument = f"{exp}"
             else:
-                argument += word_register_names[instruction[1]]
-            if (second_argument):
-                argument += ", " + second_argument
-        elif (second_argument):
-            argument = second_argument
+                # d8 signifies that the instruction is of length 2 and the
+                # second byte is the argument to the instruction.
+                # In the format string we represent this with 'bb'
+                if (instruction_match[2] == 'd8'):
+                    second_argument = 'bb'
+                    length = 2
+                # either a16 or d16 signifies an instruction of length 3
+                # with a word as argument. In the format string we
+                # represent this with 'wwww'
+                elif (instruction_match[2] in ['a16', 'd16']):
+                    second_argument = 'wwww'
+                    length = 3
+                elif (instruction_match[2]):
+                    second_argument = instruction_match[2]
 
-        arguments[opcode] = argument
-        lengths[opcode] = length
+            if (instruction_match[1]):
+                # replace B, D or H register names if we encounter an instruction that acts on a word register.
+                if (instruction_match[0] not in word_register_instructions):
+                    argument += instruction_match[1]
+                else:
+                    argument += word_register_names[instruction_match[1]]
 
-assert len(nmemonics) == 256, "Expected to find 256 instructions total"
-assert len(arguments) == 256, "Expected to find 256 instructions total"
+                if (second_argument):
+                    argument += ", " + second_argument
 
-nmemonic_table_string = "const std::string nmemonics[] = {\n"
-for i in range(255):
-    nmemonic_table_string += '"' + nmemonics[i] + '",\n'
-nmemonic_table_string += '"' + nmemonics[255] + '"\n'
-nmemonic_table_string += "};"
+            elif (second_argument):
+                argument = second_argument
 
-print(nmemonic_table_string)
-print()
+            arguments[opcode] = argument
+            lengths[opcode] = length
 
-argument_table_string = "const std::string arguments[] = {\n"
-for i in range(255):
-    argument_table_string += '"' + arguments[i] + '",\n'
-argument_table_string += '"' + arguments[255] + '"\n'
-argument_table_string += "};"
+    assert len(nmemonics) == 256, "Expected to find 256 instructions total"
 
-print(argument_table_string)
-print()
+    print(generate_nmemonics_table(nmemonics))
+    print()
 
-lengths_table_string = "const byte instructionLengths[] = {\n"
-for i in range(255):
-    lengths_table_string += f"{lengths[i]},\n"
-lengths_table_string += f"{lengths[255]}\n"
-lengths_table_string += "};"
+    print(generate_arguments_table(arguments))
+    print()
 
-print(lengths_table_string)
+    print(generate_lengths_table(lengths))
+
+if __name__ == "__main__":
+    main()
