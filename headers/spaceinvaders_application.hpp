@@ -15,13 +15,13 @@
 
 namespace emulator
 {
-    class SpaceInvadersApplication
+    class SpaceInvadersApplication : public Application
     {
         public:
             explicit SpaceInvadersApplication();
 
             // Run the application.
-            void run();
+            void run() override;
 
         private:
             void onEvent(const sf::Event& event);

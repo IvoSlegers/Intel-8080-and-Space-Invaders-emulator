@@ -21,8 +21,8 @@ namespace emulator
             explicit DiagnosticApplication();
             virtual ~DiagnosticApplication();
 
-            virtual void run();
-
+            virtual void run() override;
+            
         private:
             void runDiagnostic(const std::string& filename);
 

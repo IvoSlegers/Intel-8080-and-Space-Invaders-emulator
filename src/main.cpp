@@ -6,67 +6,80 @@
 
 #include <iostream>
 
+using emulator::Application;
+using emulator::DiagnosticApplication;
+using emulator::SpaceInvadersApplication;
+
+void runApplication(Application& app);
+
 #if EMULATOR_LOG_SFML_ERRORS
     #include <SFML/System.hpp>
     #include <fstream>
     #include <chrono>
+
+    void directSFMLErrorStreamToFile();
 #endif
-
-void runSpaceInvadersApplication()
-{
-    emulator::SpaceInvadersApplication app;
-    app.run();
-}
-
-void runDiagnosticsApplication()
-{
-    emulator::DiagnosticApplication app;
-    app.run();
-}
 
 int main(int argc, const char* argv[])
 {
     #if EMULATOR_LOG_SFML_ERRORS
-        std::ofstream logFile("error_log.txt", std::ios_base::app);
-        logFile << "--------------------------------------------------------\n";
-        std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-        logFile << "Log file of run at " <<  std::ctime(&now) << '\n';
-        sf::err().rdbuf(logFile.rdbuf());
+        directSFMLErrorStreamToFile();
     #endif
 
+    bool runDiagnostic = false;
+    if (argc >= 2)
+    {
+        std::string argument(argv[1]);
+        if (argument == "-d" || argument == "-diagnostic")
+            runDiagnostic = true;
+    }
+
+    if (runDiagnostic)
+    {
+        DiagnosticApplication application;
+        runApplication(application);
+    }
+    else
+    {
+        SpaceInvadersApplication application;
+        runApplication(application);
+    }
+
+    return EXIT_SUCCESS;  
+}
+
+void runApplication(Application& application)
+{
     try
     {
-        if (argc >= 2)
-        {
-            std::string argument(argv[1]);
-            if (argument == "-d" || argument == "-diagnostic")
-            {
-                runDiagnosticsApplication();
-            }
-            else
-            {
-                runSpaceInvadersApplication();
-            }
-        }
-        else
-            runSpaceInvadersApplication();
-
+        application.run();
     }
     catch (const console::ConsoleException& exception)
     {
-        std::cerr << "Console exception: " << exception.getMessage() << '\n';
+        std::cerr << "Console exception encountered: " << exception.what() << '\n';
         std::cin.get();
     }
     catch (const emulator::EmulatorException& exception)
     {
-        std::cerr << "Emulator exception: " << exception.getMessage() << '\n';
+        std::cerr << "Emulator exception encountered: " << exception.what() << '\n';
         std::cin.get();     
     }
     catch (const std::exception& exception)
     {
-        std::cerr << "Std exception: " << exception.what() << '\n';
+        std::cerr << "Exception encountered: " << exception.what() << '\n';
         std::cin.get();
     }
-
-    return 0;    
 }
+
+#if EMULATOR_LOG_SFML_ERRORS
+    void directSFMLErrorStreamToFile();
+    {
+        std::ofstream logFile("error_log.txt", std::ios_base::app);
+
+        logFile << "--------------------------------------------------------\n";
+        std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+        logFile << "Log file of run at " <<  std::ctime(&now) << '\n';
+
+        sf::err().rdbuf(logFile.rdbuf());
+    }
+#endif
