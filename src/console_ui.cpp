@@ -389,7 +389,10 @@ namespace emulator
                         if (!instructionsDisplay.moveToTarget(instruction))
                             showMessage("Invalid instruction selected.");
                         else
+                        {
+                            isInFollowMode = false;
                             draw();
+                        }                            
                     }
                     break;
 
@@ -501,7 +504,10 @@ namespace emulator
     {
         short x = 54, y = 6;
         console.setCursorPosition(x, y++);
-        console.write("q: Quit");
+        console.write("Esc: Quit");
+
+        console.setCursorPosition(x, y++);
+        console.write("b: Toggle breakpoint");
 
         console.setCursorPosition(x, y++);
         console.write("r: Reset");
@@ -513,16 +519,39 @@ namespace emulator
         console.write("tab: View program output");
 
         console.setCursorPosition(x, y++);
-        console.write("c: Enter command");
-
-        console.setCursorPosition(x, y++);
-        console.write("b: Toggle breakpoint");
-
-        console.setCursorPosition(x, y++);
         if (isInFollowMode)
             console.write("f: Disable follow mode");
         else
             console.write("f: Enable follow mode");
+
+        console.setCursorPosition(x, y++);
+        console.write(">: Jump to destination of control flow instruction.");
+
+        console.setCursorPosition(x, y++);
+        console.write("<: Jump back.");
+
+        console.setCursorPosition(x, y++);
+        console.write("c: Enter command");
+
+        y += 1;
+
+        console.setCursorPosition(x, y++);
+        console.write("commands:");
+
+        console.setCursorPosition(x, y++);
+        console.write("breakpoint <address> : Adds breakpoint at <address>.");
+
+        console.setCursorPosition(x, y++);
+        console.write("goto <address>  : Changes program counter to <address>.");
+
+        console.setCursorPosition(x, y++);
+        console.write("view <address>  : Moves display to <address>.");
+
+        console.setCursorPosition(x, y++);
+        console.write("save <filename> : Saves breakpoints to file.");
+
+        console.setCursorPosition(x, y++);
+        console.write("load <filename> : Loads breakpoints from file.");
     }
 
     void ConsoleUI::beginDialog(const std::string& prompt)

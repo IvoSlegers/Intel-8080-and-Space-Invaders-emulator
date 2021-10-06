@@ -95,7 +95,7 @@ namespace emulator
         {
             console.getScreenBuffer(1).write(std::string(1, static_cast<char>(state.E)));
         }
-        else if (operation == 9)
+        else if (operation == 9) // Print characters at memory address stored in DE until '$' is encountered.
         {
             word address = state.getDE();
             while (address < memory.getTotalSize())
@@ -124,13 +124,13 @@ namespace emulator
         if (event.isDirectInput && event.keyEvent.wVirtualKeyCode == VK_ESCAPE)
             running = false;
 
-        if (event.isDirectInput && event.keyEvent.uChar.AsciiChar == 'q')
+        if (event.isDirectInput && event.keyEvent.wVirtualKeyCode == VK_ESCAPE)
             running = false;
 
         if (event.isDirectInput && event.keyEvent.uChar.AsciiChar == 'a')
         {
             console.getDefaultScreenBuffer().setCursorPosition(0, console.getDefaultScreenBuffer().getWindowSize().height);
-            console.getDefaultScreenBuffer().write("running autonomously");
+            console.getDefaultScreenBuffer().write("Running until halted.");
             runningAutonomously = true;
         }
             
