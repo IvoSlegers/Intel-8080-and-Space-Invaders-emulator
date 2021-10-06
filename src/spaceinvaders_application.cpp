@@ -12,7 +12,7 @@ namespace emulator
 
     void SpaceInvadersApplication::run()
     {
-        memory.loadMemoryFromFile("invaders.rom");
+        memory.loadMemoryFromFile("roms/invaders.rom");
 
         window.setFramerateLimit(240);
         

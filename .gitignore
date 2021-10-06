@@ -1,8 +1,8 @@
-*.rom
 *.exe
 *.dll
-*.ttf
 *.o
-cpu_diagnostics/*
 *.wav
+*.prn
+*.mac
+*.asm
 TODO.txt
