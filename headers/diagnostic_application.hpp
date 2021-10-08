@@ -24,9 +24,12 @@ namespace emulator
             virtual void run() override;
             
         private:
-            void runDiagnostic(const std::string& filename);
+            void beginTest(const std::string& filename);
 
+            void handleTestIO();
             void printOutput();
+
+            void beginChooseTestPrompt();
 
             void handleEvents();
             void onConsoleEvent(const Console::Event& event);
@@ -37,9 +40,18 @@ namespace emulator
             EmptyIO io;
             DiagnosticCpu cpu;  
 
-            ConsoleUI consoleUI;   
+            ConsoleUI consoleUI;
 
-            bool running = true;
-            bool runningAutonomously = false;   
+            enum class State
+            {
+                ChoosingTest,
+                CpuPaused,
+                CpuRunning,
+                Finished
+            };
+
+            State state = State::ChoosingTest;
+
+            word previousPC = 0;
     };
 } // namespace emulator

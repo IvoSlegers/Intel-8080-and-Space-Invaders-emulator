@@ -1,5 +1,7 @@
 #include "diagnostic_application.hpp"
 
+#include <iostream>
+
 namespace emulator
 {
     DiagnosticApplication::DiagnosticApplication(): 
@@ -7,9 +9,6 @@ namespace emulator
     {
         console.createScreenBuffer();
         console.getScreenBuffer(1).setBufferSize({120, 9000});
-
-        console.createScreenBuffer();
-        console.getScreenBuffer(2).setBufferSize({120, 9000});
     }
 
     DiagnosticApplication::~DiagnosticApplication()
@@ -17,20 +16,38 @@ namespace emulator
 
     void DiagnosticApplication::run()
     {
-        runDiagnostic("roms/TST8080.COM");
-        //runDiagnostic("roms/CPUTEST.COM");
-        //runDiagnostic("roms/8080PRE.COM");
-        //runDiagnostic("roms/8080EXM.COM");
+        beginChooseTestPrompt();
 
-        runningAutonomously = false;
-        running = true;
-        while (running)
+        while (state != State::Finished)
         {
             handleEvents();
+
+            if (state == State::CpuPaused)
+            {
+                handleTestIO();
+                continue;
+            }
+
+            if (state == State::CpuRunning)
+            {
+                for (std::size_t i = 0; i < 10000 && state == State::CpuRunning; ++i)
+                {
+                    cpu.executeInstructionCycle();
+
+                    if (cpu.getState().halted)
+                    {
+                        cpu.resume();
+                        state = State::CpuPaused;
+                        continue;
+                    }
+
+                    handleTestIO();
+                }
+            }
         }
     }
 
-    void DiagnosticApplication::runDiagnostic(const std::string& filename)
+    void DiagnosticApplication::beginTest(const std::string& filename)
     {
         memory.clear();
         cpu.reset();
@@ -47,43 +64,28 @@ namespace emulator
 
         consoleUI.draw();
 
-        running = true;
-        word previousPC = cpu.getState().PC;
-        while (running)
+        state = State::CpuPaused;
+    }
+
+    void DiagnosticApplication::handleTestIO()
+    {
+        word pc = cpu.getState().PC;
+
+        if (pc == previousPC)
+            return;
+
+        if (pc == 0x0000)
         {
-            if (!runningAutonomously)
-                handleEvents();
+            console.getScreenBuffer(1).write("\nProgram terminated\n\n\n");
+            state = State::CpuPaused;
 
-            if (runningAutonomously)
-            {
-                cpu.executeInstructionCycle();
+            consoleUI.draw();
+        }            
 
-                if (cpu.getState().halted)
-                {
-                    runningAutonomously = false;
-                    cpu.resume();
+        if (pc == 0x0005)
+            printOutput();
 
-                    consoleUI.draw();
-                }        
-            }
-
-            word pc = cpu.getState().PC;
-
-            if (previousPC == pc)
-                continue;
-            previousPC = pc;
-
-            if (pc == 0x0000)
-            {
-                console.getScreenBuffer(1).write("\nProgram terminated\n");
-                running = false;
-            }
-
-            if (pc == 0x0005)
-            {
-                printOutput();
-            }
-        }
+        previousPC = pc;
     }
 
     void DiagnosticApplication::printOutput()
@@ -109,10 +111,27 @@ namespace emulator
         }        
     }
 
+    void DiagnosticApplication::beginChooseTestPrompt()
+    {
+        console.restoreDefaultScreenBuffer();
+        console.clear();
+
+        console.write("Choose test to run:\n");
+        console.write("1: TST8080.COM\n");
+        console.write("2: CPUTEST.COM\n");
+        console.write("3: 8080PRE.COM\n");
+        console.write("4: 8080EXM.COM");
+
+        console.setCursorPosition(0, 8);
+        console.write("Press 1, 2, 3 or 4 to select a test or press ESC to quit.");
+
+        state = State::ChoosingTest;
+    }
+
     void DiagnosticApplication::handleEvents()
     {
         Console::Event event;
-        if (!runningAutonomously && console.waitForEvent(event))
+        if (state != State::CpuRunning && console.waitForEvent(event))
             onConsoleEvent(event);
         
         while (console.pollEvent(event))
@@ -121,21 +140,64 @@ namespace emulator
 
     void DiagnosticApplication::onConsoleEvent(const Console::Event& event)
     {
-        if (event.isDirectInput && event.keyEvent.wVirtualKeyCode == VK_ESCAPE)
-            running = false;
-
-        if (event.isDirectInput && event.keyEvent.wVirtualKeyCode == VK_ESCAPE)
-            running = false;
-
-        if (event.isDirectInput && event.keyEvent.uChar.AsciiChar == 'a')
+        if (!event.isDirectInput)
         {
-            console.getDefaultScreenBuffer().setCursorPosition(0, console.getDefaultScreenBuffer().getWindowSize().height);
-            console.getDefaultScreenBuffer().write("Running until halted.");
-            runningAutonomously = true;
+            consoleUI.onConsoleEvent(event);
+            return;
         }
-            
 
-        consoleUI.onConsoleEvent(event);
+        if (event.keyEvent.bKeyDown && event.keyEvent.wVirtualKeyCode == VK_ESCAPE)
+        {
+            if (state == State::ChoosingTest)
+                state = State::Finished;
+            else if (state == State::CpuRunning)
+                state = State::CpuPaused;
+            else if (state == State::CpuPaused)
+                beginChooseTestPrompt();
+
+            return;
+        }
+
+        if (state == State::ChoosingTest)
+        {
+            if (event.keyEvent.bKeyDown)
+            {
+                switch (event.keyEvent.wVirtualKeyCode)
+                {
+                    case '1':
+                        beginTest("roms/TST8080.COM"); 
+                        break;
+
+                    case '2':
+                        beginTest("roms/CPUTEST.COM");
+                        break;
+
+                    case '3':
+                        beginTest("roms/8080PRE.COM");
+                        break;
+
+                    case '4':
+                        beginTest("roms/8080EXM.COM");
+                        break;
+                }
+            }
+
+            return;
+        }
+
+        if (state == State::CpuPaused)
+        {
+            if (event.keyEvent.bKeyDown && event.keyEvent.wVirtualKeyCode == 'A')
+            {
+                state = State::CpuRunning;
+
+                console.getDefaultScreenBuffer().setCursorPosition(
+                    0, console.getDefaultScreenBuffer().getWindowSize().height);
+                console.write("Running program until halt encounted.");
+            }
+            else 
+                consoleUI.onConsoleEvent(event);
+        }            
     }
 
 } // namespace emulator

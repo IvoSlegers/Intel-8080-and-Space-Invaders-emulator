@@ -346,9 +346,30 @@ namespace emulator
 
                 case VK_SPACE:
                     cpu.executeInstructionCycle();
+                    cpu.resume();
 
                     draw();
                     break;
+
+                case 'H':
+                    for (std::size_t i = 0; i < 100 && !cpu.getState().halted; ++i)
+                    {
+                        cpu.executeInstructionCycle();
+                    }
+                    cpu.resume();
+
+                    draw();
+                    break;
+
+                case 'T':
+                    for (std::size_t i = 0; i < 1000 && !cpu.getState().halted; ++i)
+                    {
+                        cpu.executeInstructionCycle();
+                    }
+                    cpu.resume();
+
+                    draw();
+                    break;                    
 
                 case VK_TAB:
                     index = (console.getActiveScreenBufferIndex() + 1) % console.getNumberOfScreenBuffers();
