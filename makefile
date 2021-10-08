@@ -30,7 +30,7 @@ release : link_options += -lsfml-main
 release : link_options += -lsfml-graphics
 release : link_options += -lsfml-system
 release : link_options += -lsfml-window
-release : link_options += -lsfml-audio-d
+release : link_options += -lsfml-audio
 
 # specify the name of the output executable
 debug : output_file = application_debug
