@@ -67,6 +67,50 @@ namespace emulator
         textureUpdateRequired = true;
     }
 
+    void SpaceInvadersVideo::updateTopHalf()
+    {
+        // Update the top half of the CRT (that is, top half before rotation).
+        // We update the various colored regions of the CRT separately.
+        // Keep in mind that the CRT is rotated 90 degrees counter-clockwise. Hence, the x coordinate
+        // measures the height of an element on the screen.
+
+        unsigned short x = 0, y = 0;
+
+        update(x, y, bottomWhiteRegionHeight, bottomWhiteRegionWidth1, 
+            sf::Color::White, sf::Color::Black);
+
+        y += bottomWhiteRegionWidth1;
+
+        update(x, y, bottomWhiteRegionHeight, bottomGreenRegionWidth, 
+            sf::Color::Green, sf::Color::Black);
+
+        y += bottomGreenRegionWidth;
+
+        update(x, y, bottomWhiteRegionHeight, crtHeight / 2 - y, 
+            sf::Color::Green, sf::Color::Black);
+
+        y = 0;
+        x += bottomWhiteRegionHeight;
+
+        updateCommonPart(x, y);
+    }
+
+    void SpaceInvadersVideo::updateBottomHalf()
+    {
+        // Update the various colored regions of the CRT separately.
+        // Keep in mind that the CRT is rotated 90 degrees counter-clockwise. Hence, the x coordinate
+        // measures the height of an element on the screen.
+
+        unsigned short x = 0, y = crtHeight / 2;
+
+        update(x, y, bottomWhiteRegionHeight, crtHeight / 2, 
+            sf::Color::White, sf::Color::Black);
+
+        x += bottomWhiteRegionHeight;
+
+        updateCommonPart(x, y);
+    }
+
     void SpaceInvadersVideo::draw()
     {
         if (textureUpdateRequired)
@@ -79,4 +123,24 @@ namespace emulator
         window.draw(sprite);
     }
 
+    void SpaceInvadersVideo::updateCommonPart(unsigned short x, unsigned short y)
+    {
+        update(x, y, greenRegionHeight1, crtHeight / 2, 
+            sf::Color::Green, sf::Color::Black);
+
+        x += greenRegionHeight1;
+
+        update(x, y, middleWhiteRegionHeight, crtHeight / 2, 
+            sf::Color::White, sf::Color::Black);
+
+        x += middleWhiteRegionHeight;
+
+        update(x, y, redRegionHeight, crtHeight / 2, 
+            sf::Color::Red, sf::Color::Black);      
+
+        x += redRegionHeight;
+        
+        update(x, y, topWhiteRegionHeight, crtHeight / 2, 
+            sf::Color::White, sf::Color::Black);  
+    }
 } // namespace emulator

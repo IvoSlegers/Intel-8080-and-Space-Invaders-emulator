@@ -1,7 +1,5 @@
 #include "diagnostic_application.hpp"
 
-#include <iostream>
-
 namespace emulator
 {
     DiagnosticApplication::DiagnosticApplication(): 

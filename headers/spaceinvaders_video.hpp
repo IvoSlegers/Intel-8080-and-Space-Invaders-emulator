@@ -29,6 +29,14 @@ namespace emulator
             void update(unsigned short x, unsigned short y, unsigned short width, unsigned short height,
                 sf::Color foregroundColor, sf::Color backgroundColor);
 
+            // Reads the part of video memory corresponding to the top half of the CRT
+            // and updates the sfml texture.
+            void updateTopHalf();
+
+            // Reads the part of video memory corresponding to the bottom half of the CRT
+            // and updates the sfml texture.
+            void updateBottomHalf();
+
             // Draw the SFML texture to the screen.
             void draw();
 
@@ -47,7 +55,22 @@ namespace emulator
 
             // The in memory video buffer is located at addresses 2400 - 3FFF
             static constexpr unsigned short videoBufferAddress = 0x2400;
+
+            // Constants which encode the coordinates of the colored overlays on the 
+            // CRT. Measurements taken from
+            // https://github.com/howprice/invaders-emulator/blob/master/src/machine.cpp
+            static constexpr unsigned short topWhiteRegionHeight = 32;
+            static constexpr unsigned short redRegionHeight = 32;
+            static constexpr unsigned short middleWhiteRegionHeight = 120;
+            static constexpr unsigned short greenRegionHeight1 = 56;
+            static constexpr unsigned short greenRegionHeight2 = 72;
+            static constexpr unsigned short bottomWhiteRegionHeight = 16;
+            static constexpr unsigned short bottomWhiteRegionWidth1 = 16;
+            static constexpr unsigned short bottomWhiteRegionWidth2 = 122;
+            static constexpr unsigned short bottomGreenRegionWidth = 86;
         private:
+            void updateCommonPart(unsigned short x, unsigned short y);
+
             sf::RenderWindow& window;
 
             sf::Texture texture;

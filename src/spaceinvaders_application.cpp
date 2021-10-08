@@ -72,8 +72,7 @@ namespace emulator
         {
             if (upperHalf)
             {
-                video.update(0, 0, SpaceInvadersVideo::crtWidth, SpaceInvadersVideo::crtHeight/2,
-                sf::Color::White, sf::Color::Black);
+                video.updateTopHalf();
 
                 // The Space Invaders cabinet issues a RST1 interrupt each time the top half of the
                 // screen is drawn by the CRT.
@@ -81,8 +80,7 @@ namespace emulator
             }
             else
             {
-                video.update(0, SpaceInvadersVideo::crtHeight/2, SpaceInvadersVideo::crtWidth,
-                    SpaceInvadersVideo::crtHeight/2, sf::Color::White, sf::Color::Black);
+                video.updateBottomHalf();
 
                 // The Space Invaders cabinet issues a RST2 interrupt each time the bottom half of the 
                 // screen is drawn by the CRT.
