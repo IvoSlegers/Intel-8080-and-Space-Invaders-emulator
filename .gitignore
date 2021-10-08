@@ -6,3 +6,4 @@
 *.mac
 *.asm
 TODO.txt
+.vscode/*
