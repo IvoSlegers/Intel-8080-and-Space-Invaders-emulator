@@ -118,10 +118,11 @@ namespace emulator
         console.write("1: TST8080.COM\n");
         console.write("2: CPUTEST.COM\n");
         console.write("3: 8080PRE.COM\n");
-        console.write("4: 8080EXM.COM");
+        console.write("4: 8080EXM.COM\n");
+        console.write("5: 8080EXER.COM\n");
 
         console.setCursorPosition(0, 8);
-        console.write("Press 1, 2, 3 or 4 to select a test or press ESC to quit.");
+        console.write("Press 1, 2, 3, 4 or 5 to select a test or press ESC to quit.");
 
         state = State::ChoosingTest;
     }
@@ -176,6 +177,10 @@ namespace emulator
 
                     case '4':
                         beginTest("roms/8080EXM.COM");
+                        break;
+
+                    case '5':
+                        beginTest("roms/8080EXER.COM");
                         break;
                 }
             }
