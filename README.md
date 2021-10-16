@@ -1,11 +1,11 @@
 # Intel 8080 microprocessor and Space Invaders emulator
-A accurate emulator of the Intel 8080 microprocessor.
+An accurate emulator of the Intel 8080 microprocessor.
 
 This project consists of two parts.
 
 ### Intel 8080 emulator
 
-A accurate emulator of the Intel 8080 microprocessor. 
+An accurate emulator of the Intel 8080 microprocessor. 
 
 Passes the following four 8080 diagnostic tests:
   * 8080EXM.COM
@@ -15,7 +15,7 @@ Passes the following four 8080 diagnostic tests:
   
 To run these tests start the application with the -d command-line option. 
 
-A small  debugging application is implemented in the console window which allows the user to run a program step by step or set breakpoints.
+A small debugging application is implemented in the console window which allows the user to run a program step by step or set breakpoints.
 
 ### Space Invaders emulator
 
